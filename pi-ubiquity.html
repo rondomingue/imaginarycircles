@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imaginary Circles — 04 The Ubiquity of Pi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: hsl(215, 26%, 7%);
+    --bg-elevated: hsl(215, 24%, 10%);
+    --cell: hsl(215, 22%, 12%);
+    --line: hsl(215, 18%, 22%);
+    --line-soft: hsl(215, 18%, 16%);
+    --ink: hsl(210, 32%, 93%);
+    --ink-dim: hsl(212, 15%, 58%);
+    --ink-faint: hsl(212, 14%, 38%);
+    --accent: hsl(199, 92%, 62%);
+    --accent-b: hsl(174, 70%, 55%);
+    --accent-glow: hsla(199, 92%, 62%, 0.30);
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink);}
+  body{padding:48px 24px 100px; font-family:var(--mono); -webkit-font-smoothing:antialiased;}
+  .page{max-width:1040px; margin:0 auto;}
+
+  .eyebrow{font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--accent);}
+  h1{font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,50px); letter-spacing:-0.02em; line-height:1.08; margin-bottom:16px;}
+  h1 span{color:var(--accent-b);}
+  .sub{font-family:var(--display); font-size:16px; color:var(--ink-dim); max-width:640px; line-height:1.6; margin-bottom:48px;}
+
+  /* nav */
+  .seriesnav{max-width:1040px;margin:0 auto 40px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px; padding-bottom:16px; border-bottom:1px solid var(--line-soft);}
+  .seriesnav-label{font-family:var(--display); font-weight:600; font-size:13px; letter-spacing:0.02em; color:var(--ink); white-space:nowrap;}
+  .seriesnav-links{display:flex; flex-wrap:wrap; gap:4px 18px;}
+  .seriesnav-links a{font-family:var(--mono); font-size:12px; color:var(--ink-dim); text-decoration:none; border-bottom:1px solid transparent; padding-bottom:2px; transition:color .15s ease,border-color .15s ease;}
+  .seriesnav-links a:hover{color:var(--ink);}
+  .seriesnav-links a.current{color:var(--accent); border-color:var(--accent);}
+
+  /* appearances grid, periodic-table style */
+  .grid-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:8px;}
+  .grid-title{font-family:var(--display); font-size:20px; font-weight:600;}
+  .grid-count{font-size:12px; color:var(--ink-faint);}
+  .table{display:grid; grid-template-columns:repeat(4, 1fr); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); margin-bottom:56px;}
+  @media (max-width:760px){ .table{grid-template-columns:repeat(2,1fr);} }
+  .cell{background:var(--cell); padding:16px 14px; display:flex; flex-direction:column; gap:8px; min-height:132px;}
+  .cell-num{font-size:10.5px; color:var(--ink-faint);}
+  .cell-eq{font-family:var(--display); font-size:17px; font-weight:600; color:var(--accent); letter-spacing:-0.01em;}
+  .cell-name{font-size:11px; color:var(--ink); font-weight:500;}
+  .cell-desc{font-size:10.5px; color:var(--ink-dim); line-height:1.5; margin-top:auto;}
+
+  /* panels */
+  .panel{background:var(--bg-elevated); border:1px solid var(--line-soft); border-radius:2px; padding:28px; margin-bottom:36px; display:grid; grid-template-columns: 1fr 300px; gap:32px;}
+  @media (max-width:820px){ .panel{grid-template-columns:1fr;} }
+  .panel-num{font-size:11px; color:var(--ink-faint); letter-spacing:0.1em; margin-bottom:6px;}
+  .panel-title{font-family:var(--display); font-size:20px; font-weight:600; margin-bottom:14px;}
+  .panel-text{font-family:var(--display); font-size:14px; color:var(--ink-dim); line-height:1.65; margin-bottom:14px;}
+  .panel-text b{color:var(--ink); font-weight:600;}
+  .eq{font-family:var(--mono); font-size:15px; color:var(--accent); background:var(--bg); border:1px solid var(--line-soft); padding:10px 12px; margin-bottom:10px; letter-spacing:0.01em; display:inline-block;}
+  canvas{width:100%; height:auto; display:block; background:var(--bg); border:1px solid var(--line-soft);}
+  .controls{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .controls button{font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; background:var(--bg); color:var(--ink-dim); border:1px solid var(--line); padding:8px 12px; cursor:pointer; transition:all .15s ease;}
+  .controls button:hover{color:var(--ink); border-color:var(--ink-faint);}
+  .controls button.active{color:var(--bg); background:var(--accent); border-color:var(--accent);}
+  .caption{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:10px;}
+  .readout{font-family:var(--mono); font-size:13px; color:var(--accent); margin-top:10px;}
+
+  footer{margin-top:44px; font-family:var(--display); font-size:12.5px; color:var(--ink-faint); line-height:1.75; max-width:660px;}
+  footer b{color:var(--ink-dim);}
+</style>
+</head>
+<body>
+<nav class="seriesnav">
+  <span class="seriesnav-label">Imaginary Circles</span>
+  <div class="seriesnav-links">
+    <a href="radian-circle.html">01 · The Radian Circle</a>
+    <a href="circle-to-wave.html">02 · Circle → Wave → Fourier → Schrödinger</a>
+    <a href="euler-imaginary.html">03 · e, i & Quantum Mechanics</a>
+    <a href="pi-ubiquity.html" class="current">04 · The Ubiquity of Pi</a>
+    <a href="feynman-clocks.html">05 · Feynman's Rotating Clocks</a>
+  </div>
+</nav>
+<div class="page">
+  <header>
+    <div class="eyebrow">3.14159265…</div>
+    <h1>The Ubiquity<br>of <span>Pi</span></h1>
+    <p class="sub">Pi starts as a fact about circles, circumference divided by diameter. It should have stayed there. Instead it turns up in coin-flip statistics, factorial approximations, needle-dropping experiments, and the uncertainty at the bottom of quantum mechanics, places with no circle anywhere in sight.</p>
+  </header>
+
+  <section class="grid-head">
+    <div class="grid-title">Twelve appearances</div>
+    <div class="grid-count">geometry · number theory · probability · physics</div>
+  </section>
+  <div class="table" id="table">
+    <div class="cell"><div class="cell-num">geometry</div><div class="cell-eq">C = 2πr</div><div class="cell-name">Circumference</div><div class="cell-desc">The definition pi was named for.</div></div>
+    <div class="cell"><div class="cell-num">geometry</div><div class="cell-eq">A = πr²</div><div class="cell-name">Circle area</div><div class="cell-desc">Same constant, one power higher.</div></div>
+    <div class="cell"><div class="cell-num">geometry</div><div class="cell-eq">V = 4/3·πr³</div><div class="cell-name">Sphere volume</div><div class="cell-desc">Pi survives the jump to 3 dimensions.</div></div>
+    <div class="cell"><div class="cell-num">number theory · 1734</div><div class="cell-eq">Σ 1/n² = π²/6</div><div class="cell-name">Basel problem</div><div class="cell-desc">Euler's shock: no circle, yet pi appears exactly.</div></div>
+    <div class="cell"><div class="cell-num">calculus</div><div class="cell-eq">∫e<sup>−x²</sup>dx = √π</div><div class="cell-name">Gaussian integral</div><div class="cell-desc">The bell curve's area is literally √π.</div></div>
+    <div class="cell"><div class="cell-num">probability · 1733</div><div class="cell-eq">P ≈ 2L/(πd)</div><div class="cell-name">Buffon's needle</div><div class="cell-desc">Drop needles on lined paper, measure pi.</div></div>
+    <div class="cell"><div class="cell-num">combinatorics</div><div class="cell-eq">n! ≈ √(2πn)(n/e)ⁿ</div><div class="cell-name">Stirling's approximation</div><div class="cell-desc">Factorials quietly carry a pi.</div></div>
+    <div class="cell"><div class="cell-num">quantum mechanics</div><div class="cell-eq">ΔxΔp ≥ ħ/2</div><div class="cell-name">Heisenberg uncertainty</div><div class="cell-desc">ħ = h/2π. Pi sets the floor on precision.</div></div>
+    <div class="cell"><div class="cell-num">signal processing</div><div class="cell-eq">1/√(2π) · ∫f(x)e<sup>−iωx</sup>dx</div><div class="cell-name">Fourier transform</div><div class="cell-desc">The normalizing constant from panel 03's series.</div></div>
+    <div class="cell"><div class="cell-num">electromagnetism</div><div class="cell-eq">F = q₁q₂/4πε₀r²</div><div class="cell-name">Coulomb's law</div><div class="cell-desc">Pi from a charge's field spreading over a sphere.</div></div>
+    <div class="cell"><div class="cell-num">thermodynamics</div><div class="cell-eq">B(ν,T) ∝ ν³/(e<sup>hν/kT</sup>−1)</div><div class="cell-name">Planck's law</div><div class="cell-desc">Pi enters integrating radiation over all directions.</div></div>
+    <div class="cell"><div class="cell-num">1748</div><div class="cell-eq">e<sup>iπ</sup> + 1 = 0</div><div class="cell-name">Euler's identity</div><div class="cell-desc">Growth, rotation, and pi in one line. See page 03.</div></div>
+  </div>
+
+  <!-- PANEL 1: Basel problem -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">01</div>
+      <div class="panel-title">A sum with no circle that lands on pi anyway</div>
+      <canvas id="cBasel" width="900" height="280"></canvas>
+      <div class="controls" id="baselControls">
+        <button data-n="5">5 terms</button>
+        <button data-n="20">20 terms</button>
+        <button data-n="200">200 terms</button>
+        <button data-n="5000" class="active">5000 terms</button>
+      </div>
+      <div class="readout" id="baselReadout"></div>
+    </div>
+    <div>
+      <p class="panel-text">Add up the reciprocals of the square numbers, 1 + 1/4 + 1/9 + 1/16 + …, forever. Nothing here mentions a circle. Euler proved in 1734 that the sum converges to exactly π²/6, a result that stunned mathematicians who'd been stuck on it for decades.</p>
+      <div class="eq">1/1² + 1/2² + 1/3² + … = π²/6 ≈ 1.6449</div>
+      <p class="panel-text">Pi's appearance here comes from the same infinite series machinery as panel 03's Euler identity, not from any drawn circle. It's the first hint that pi is bigger than geometry.</p>
+    </div>
+  </section>
+
+  <!-- PANEL 2: Gaussian -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">02</div>
+      <div class="panel-title">Pi underwrites the bell curve</div>
+      <canvas id="cGauss" width="900" height="280"></canvas>
+      <div class="caption">the area under e<sup>−x²</sup> is exactly √π, shaded</div>
+    </div>
+    <div>
+      <p class="panel-text">The Gaussian integral has no circle in its setup either, it's just the area under e<sup>−x²</sup>. The clean proof squares the integral and rewrites it as a genuinely circular problem, integrating over a disk in polar coordinates, which is where the pi sneaks in.</p>
+      <div class="eq">∫<sub>−∞</sub><sup>∞</sup> e<sup>−x²</sup> dx = √π</div>
+      <p class="panel-text">Divide by √(2π) and you get the normal distribution's normalizing constant, the reason IQ scores, measurement error, and noise all carry a pi buried in their formulas.</p>
+    </div>
+  </section>
+
+  <!-- PANEL 3: Buffon's needle -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">03</div>
+      <div class="panel-title">Estimating pi by dropping needles</div>
+      <canvas id="cBuffon" width="900" height="280"></canvas>
+      <div class="readout" id="buffonReadout">warming up…</div>
+    </div>
+    <div>
+      <p class="panel-text">Rule strips of paper a fixed distance apart, drop a needle shorter than that spacing, and count how often it crosses a line. In 1733 Buffon showed that crossing probability depends on pi, which means <b>you can measure pi by throwing needles at a floor.</b></p>
+      <div class="eq">P(cross) = 2L / (πd)</div>
+      <p class="panel-text">The needles here are dropping and accumulating live. With enough drops the running estimate wobbles down toward 3.14159, purely from geometry and chance, no circle drawn once.</p>
+    </div>
+  </section>
+
+  <footer>
+    <b>Why pi keeps showing up:</b> anywhere a quantity depends on angles wrapping around a full turn, whether that's a literal circle, a wave's phase in Fourier analysis, a probability distribution's spread, or a quantum wavefunction cycling through its phase, the bookkeeping eventually asks "how far around?" and pi is the answer. Pages 02 and 03 in this series show the same constant arriving from the rotation side, e<sup>iπ</sup> = −1, and from the growth side, ħ = h/2π. This page shows it arriving from sums, integrals, and coin-flip-style chance as well. It isn't that circles hide everywhere. It's that pi was never really just about circles.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const COL = {
+    line: 'rgba(140,160,185,0.18)',
+    lineSoft: 'rgba(140,160,185,0.10)',
+    dim: 'rgba(140,160,185,0.55)',
+    accent: 'rgba(90,196,255,1)',
+    accentB: 'rgba(70,210,190,1)',
+    accentSoft: 'rgba(90,196,255,0.25)'
+  };
+  function ctxOf(id){ const cv=document.getElementById(id); return {cv, ctx:cv.getContext('2d'), w:cv.width, h:cv.height}; }
+  function clear(P){ P.ctx.clearRect(0,0,P.w,P.h); }
+  function dot(ctx,x,y,r,color){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); }
+
+  // ---------- Panel 1: Basel problem ----------
+  const PB = ctxOf('cBasel');
+  let baselN = 5000;
+  function drawBasel(){
+    clear(PB); const ctx=PB.ctx;
+    const x0=50, y0=240, w=800, h=190;
+    const target = Math.PI*Math.PI/6;
+    ctx.strokeStyle=COL.lineSoft; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0+w,y0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0,y0-h); ctx.stroke();
+    ctx.strokeStyle=COL.dim; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(x0,y0-h); ctx.lineTo(x0+w,y0-h); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=COL.dim; ctx.font='11px JetBrains Mono';
+    ctx.fillText('π²/6 ≈ 1.6449', x0+w-96, y0-h-8);
+
+    const showTerms = Math.min(baselN, 60);
+    ctx.strokeStyle=COL.accent; ctx.lineWidth=2; ctx.beginPath();
+    let sum=0;
+    const step = w/Math.max(showTerms,1);
+    for(let n=1; n<=showTerms; n++){
+      sum += 1/(n*n);
+      const y = y0 - h*(sum/target);
+      const px = x0 + n*step;
+      if(n===1) ctx.moveTo(x0,y0); 
+      ctx.lineTo(px,y);
+    }
+    ctx.stroke();
+    let fullSum=0; for(let n=1;n<=baselN;n++) fullSum += 1/(n*n);
+    dot(ctx, x0+w, y0-h*(fullSum/target), 4.5, COL.accentB);
+    document.getElementById('baselReadout').textContent =
+      'after ' + baselN + ' terms: ' + fullSum.toFixed(6) + '  (target π²/6 = ' + target.toFixed(6) + ')';
+  }
+  document.getElementById('baselControls').addEventListener('click', e=>{
+    const btn=e.target.closest('button'); if(!btn) return;
+    document.querySelectorAll('#baselControls button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    baselN = parseInt(btn.dataset.n,10);
+    drawBasel();
+  });
+  drawBasel();
+
+  // ---------- Panel 2: Gaussian ----------
+  const PG = ctxOf('cGauss');
+  function drawGauss(){
+    clear(PG); const ctx=PG.ctx;
+    const x0=450, y0=230, sx=150, sy=170;
+    ctx.strokeStyle=COL.lineSoft; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(60,y0); ctx.lineTo(840,y0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x0,40); ctx.lineTo(x0,y0); ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x0-3*sx, y0);
+    for(let px=-3*sx; px<=3*sx; px+=2){
+      const xv=px/sx; const yv=Math.exp(-xv*xv);
+      ctx.lineTo(x0+px, y0-yv*sy);
+    }
+    ctx.lineTo(x0+3*sx,y0); ctx.closePath();
+    ctx.fillStyle='rgba(90,196,255,0.14)'; ctx.fill();
+
+    ctx.strokeStyle=COL.accent; ctx.lineWidth=2; ctx.beginPath();
+    for(let px=-3*sx; px<=3*sx; px+=2){
+      const xv=px/sx; const yv=Math.exp(-xv*xv);
+      const cx=x0+px, cy=y0-yv*sy;
+      if(px===-3*sx) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
+    }
+    ctx.stroke();
+    ctx.fillStyle=COL.dim; ctx.font='11px JetBrains Mono';
+    ctx.fillText('e^(−x²)', x0+3*sx-70, y0-24);
+    ctx.fillText('area = √π ≈ 1.7725', x0-60, 60);
+  }
+  drawGauss();
+
+  // ---------- Panel 3: Buffon's needle ----------
+  const PN = ctxOf('cBuffon');
+  const d = 40, L = 34;
+  const lineTop = 20, lineCount = 7;
+  let drops = [], totalDrops = 0, crossings = 0;
+  function addBatch(n){
+    for(let i=0;i<n;i++){
+      const x = 60 + Math.random()*760;
+      const y = lineTop + Math.random()*(lineCount-1)*d;
+      const angle = Math.random()*Math.PI;
+      const halfV = (L/2)*Math.sin(angle);
+      const relToLine = (y - lineTop) % d;
+      const distToNearest = Math.min(relToLine, d-relToLine);
+      const crossed = halfV > distToNearest;
+      drops.push({x,y,angle,crossed});
+      if(drops.length>140) drops.shift();
+      totalDrops++; if(crossed) crossings++;
+    }
+  }
+  function drawBuffon(){
+    clear(PN); const ctx=PN.ctx;
+    ctx.strokeStyle=COL.lineSoft; ctx.lineWidth=1;
+    for(let i=0;i<lineCount;i++){
+      const y=lineTop+i*d;
+      ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(840,y); ctx.stroke();
+    }
+    drops.forEach(nd=>{
+      const dx=(L/2)*Math.cos(nd.angle), dy=(L/2)*Math.sin(nd.angle);
+      ctx.strokeStyle = nd.crossed ? COL.accent : COL.dim;
+      ctx.lineWidth = nd.crossed ? 2 : 1.3;
+      ctx.beginPath(); ctx.moveTo(nd.x-dx, nd.y-dy); ctx.lineTo(nd.x+dx, nd.y+dy); ctx.stroke();
+    });
+    const est = crossings>0 ? (2*L*totalDrops)/(d*crossings) : 0;
+    document.getElementById('buffonReadout').textContent =
+      'drops: ' + totalDrops + '   crossings: ' + crossings + '   estimate: ' + (crossings>0? est.toFixed(4):'—') + '   (π = 3.14159)';
+  }
+  setInterval(()=>{ addBatch(5); drawBuffon(); }, 180);
+  drawBuffon();
+})();
+</script>
+</body>
+</html>

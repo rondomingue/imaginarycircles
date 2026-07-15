@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imaginary Circles — 05 Feynman's Rotating Clocks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: hsl(215, 26%, 7%);
+    --bg-elevated: hsl(215, 24%, 10%);
+    --line: hsl(215, 18%, 22%);
+    --line-soft: hsl(215, 18%, 16%);
+    --ink: hsl(210, 32%, 93%);
+    --ink-dim: hsl(212, 15%, 58%);
+    --ink-faint: hsl(212, 14%, 38%);
+    --accent: hsl(199, 92%, 62%);
+    --accent-b: hsl(174, 70%, 55%);
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink);}
+  body{padding:48px 24px 100px; font-family:var(--mono); -webkit-font-smoothing:antialiased;}
+  .page{max-width:1040px; margin:0 auto;}
+
+  .eyebrow{font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--accent);}
+  h1{font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,50px); letter-spacing:-0.02em; line-height:1.08; margin-bottom:16px;}
+  h1 span{color:var(--accent-b);}
+  .sub{font-family:var(--display); font-size:16px; color:var(--ink-dim); max-width:640px; line-height:1.6; margin-bottom:48px;}
+
+  .seriesnav{max-width:1040px;margin:0 auto 40px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px; padding-bottom:16px; border-bottom:1px solid var(--line-soft);}
+  .seriesnav-label{font-family:var(--display); font-weight:600; font-size:13px; letter-spacing:0.02em; color:var(--ink); white-space:nowrap;}
+  .seriesnav-links{display:flex; flex-wrap:wrap; gap:4px 18px;}
+  .seriesnav-links a{font-family:var(--mono); font-size:12px; color:var(--ink-dim); text-decoration:none; border-bottom:1px solid transparent; padding-bottom:2px; transition:color .15s ease,border-color .15s ease;}
+  .seriesnav-links a:hover{color:var(--ink);}
+  .seriesnav-links a.current{color:var(--accent); border-color:var(--accent);}
+
+  .panel{background:var(--bg-elevated); border:1px solid var(--line-soft); border-radius:2px; padding:28px; margin-bottom:36px; display:grid; grid-template-columns: 1fr 300px; gap:32px;}
+  @media (max-width:820px){ .panel{grid-template-columns:1fr;} }
+  .panel-num{font-size:11px; color:var(--ink-faint); letter-spacing:0.1em; margin-bottom:6px;}
+  .panel-title{font-family:var(--display); font-size:20px; font-weight:600; margin-bottom:14px;}
+  .panel-text{font-family:var(--display); font-size:14px; color:var(--ink-dim); line-height:1.65; margin-bottom:14px;}
+  .panel-text b{color:var(--ink); font-weight:600;}
+  .eq{font-family:var(--mono); font-size:15px; color:var(--accent); background:var(--bg); border:1px solid var(--line-soft); padding:10px 12px; margin-bottom:10px; letter-spacing:0.01em; display:inline-block;}
+  canvas{width:100%; height:auto; display:block; background:var(--bg); border:1px solid var(--line-soft);}
+  .controls{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .controls button{font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; background:var(--bg); color:var(--ink-dim); border:1px solid var(--line); padding:8px 12px; cursor:pointer; transition:all .15s ease;}
+  .controls button:hover{color:var(--ink); border-color:var(--ink-faint);}
+  .controls button.active{color:var(--bg); background:var(--accent); border-color:var(--accent);}
+  .caption{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:10px;}
+  .readout{font-family:var(--mono); font-size:13px; color:var(--accent); margin-top:10px;}
+
+  footer{margin-top:44px; font-family:var(--display); font-size:12.5px; color:var(--ink-faint); line-height:1.75; max-width:660px;}
+  footer b{color:var(--ink-dim);}
+</style>
+</head>
+<body>
+<nav class="seriesnav">
+  <span class="seriesnav-label">Imaginary Circles</span>
+  <div class="seriesnav-links">
+    <a href="radian-circle.html">01 · The Radian Circle</a>
+    <a href="circle-to-wave.html">02 · Circle → Wave → Fourier → Schrödinger</a>
+    <a href="euler-imaginary.html">03 · e, i & Quantum Mechanics</a>
+    <a href="pi-ubiquity.html">04 · The Ubiquity of Pi</a>
+    <a href="feynman-clocks.html" class="current">05 · Feynman's Rotating Clocks</a>
+  </div>
+</nav>
+<div class="page">
+  <header>
+    <div class="eyebrow">1948 · QED</div>
+    <h1>Feynman's<br>Rotating <span>Clocks</span></h1>
+    <p class="sub">Richard Feynman explained quantum electrodynamics with literal clock hands: draw a tiny spinning arrow for every possible path a particle could take, add all the arrows together, and the length of what's left tells you the probability. It's panel 02's rotating exponential, turned into a method for predicting how light actually behaves.</p>
+  </header>
+
+  <!-- PANEL 1 -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">01</div>
+      <div class="panel-title">One clock per possible path</div>
+      <canvas id="cMirror" width="900" height="300"></canvas>
+      <div class="controls" id="mirrorControls">
+        <button data-mode="all" class="active">every point on the mirror</button>
+        <button data-mode="near">only near the shortest path</button>
+      </div>
+      <div class="caption">top: a little clock at each candidate bounce point · bottom: those clocks chained tip-to-tail</div>
+    </div>
+    <div>
+      <p class="panel-text">Light bouncing off a mirror looks like it takes one path, the one where the angle in equals the angle out. Feynman's method says it actually explores <b>every</b> bounce point at once. Each candidate path gets a clock hand set spinning at a rate fixed by how long that path takes.</p>
+      <div class="eq">arrow angle = 2π × (path length) / λ</div>
+      <p class="panel-text">Bounce points far from the "obvious" reflection point have wildly different path lengths from their neighbors, so their clocks point every which way and mostly cancel when added. Near the shortest path, path length barely changes from one point to the next, so those clocks stay nearly aligned and add up to something real. That's why the mirror seems to obey a single simple rule, it's really a landslide vote among nearby paths.</p>
+    </div>
+  </section>
+
+  <!-- PANEL 2 -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">02</div>
+      <div class="panel-title">The same rotation, once more</div>
+      <div style="padding:18px 0;">
+        <div class="eq">amplitude = Σ<sub>paths</sub> e<sup>iS/ħ</sup></div>
+        <div class="eq">ψ(t) = ψ(0)·e<sup>−iEt/ħ</sup></div>
+      </div>
+      <p class="panel-text" style="max-width:640px;">In panel 01 the clock angle came from path length divided by wavelength, light's stand-in for a deeper quantity called the <b>action</b>, S. Feynman's path integral sums e<sup>iS/ħ</sup> over every conceivable trajectory a particle could take through space and time, not just light bouncing off a mirror. Page 03's ψ(t) = ψ(0)·e<sup>−iEt/ħ</sup> is what falls out of that sum for a particle sitting in one definite energy state: a single path, spinning at one steady rate, because there's nothing left to average over.</p>
+      <p class="panel-text" style="max-width:640px;">Schrödinger's equation and Feynman's sum-over-paths were proven to be the same theory, written two different ways, arrows added all at once versus a single wave evolving smoothly. Zoom out far enough and even ordinary classical motion, a thrown ball, a swinging pendulum, is this same landslide vote: nearly every path cancels itself out except the one obeying Newton's laws.</p>
+    </div>
+  </section>
+
+  <!-- PANEL 3 -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">03</div>
+      <div class="panel-title">Two paths, one interference pattern</div>
+      <canvas id="cSlit" width="900" height="300"></canvas>
+      <div class="caption">two arrows, one per slit, added at each screen position · their combined length squared is what you'd actually see</div>
+    </div>
+    <div>
+      <p class="panel-text">Send a particle through two slits and there are exactly two paths to sum: through slit one, or through slit two. Each contributes one clock arrow, its angle set by that path's length to the detector. Where the two arrows land pointing the same way, they add up to something big, a bright fringe. Where they land pointing opposite ways, they cancel to nothing, a dark fringe.</p>
+      <div class="eq">intensity(y) = |arrow₁(y) + arrow₂(y)|²</div>
+      <p class="panel-text">No path "knows" about the other slit. The interference pattern is just what two spinning clocks look like when you add them and square the result, the same operation running through every panel in this series.</p>
+    </div>
+  </section>
+
+  <footer>
+    <b>Where this leaves the circle:</b> a rotating point measures angle (page 01), becomes a wave (page 02), explains why the wave equation is complex (page 03), turns up everywhere pi does (page 04), and here, chained by the thousands across every path a particle could possibly take, it becomes the mechanism underneath quantum probability itself. Add enough spinning arrows in enough different ways and you get geometry, growth, waves, interference, and the rules of the universe, all from the same picture.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const COL = {
+    line: 'rgba(140,160,185,0.18)',
+    lineSoft: 'rgba(140,160,185,0.10)',
+    dim: 'rgba(140,160,185,0.55)',
+    accent: 'rgba(90,196,255,1)',
+    accentB: 'rgba(70,210,190,1)',
+    accentSoft: 'rgba(90,196,255,0.25)'
+  };
+  function ctxOf(id){ const cv=document.getElementById(id); return {cv, ctx:cv.getContext('2d'), w:cv.width, h:cv.height}; }
+  function clear(P){ P.ctx.clearRect(0,0,P.w,P.h); }
+  function dot(ctx,x,y,r,color){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); }
+
+  // ---------- Panel 1: mirror phasors ----------
+  const PM = ctxOf('cMirror');
+  const A = {x:150,y:40}, B = {x:750,y:40}, mirrorY = 140;
+  const lambda1 = 60;
+  let mirrorMode = 'all';
+  document.getElementById('mirrorControls').addEventListener('click', e=>{
+    const btn=e.target.closest('button'); if(!btn) return;
+    document.querySelectorAll('#mirrorControls button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mirrorMode = btn.dataset.mode;
+  });
+  function pathAngle(x, t){
+    const len = Math.hypot(A.x-x, A.y-mirrorY) + Math.hypot(B.x-x, B.y-mirrorY);
+    return (len/lambda1)*Math.PI*2 + t*0.4;
+  }
+  function samplePoints(){
+    if(mirrorMode==='all'){
+      const pts=[]; for(let i=0;i<40;i++) pts.push(90+ i*(720/39));
+      return pts;
+    } else {
+      const pts=[]; for(let i=0;i<16;i++) pts.push(400+ i*(100/15));
+      return pts;
+    }
+  }
+  function drawMirror(t){
+    clear(PM); const ctx=PM.ctx;
+    // strip of little clocks along the mirror, y 20-120
+    ctx.strokeStyle=COL.lineSoft; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(60,mirrorY); ctx.lineTo(840,mirrorY); ctx.stroke();
+    ctx.fillStyle=COL.dim; ctx.font='10px JetBrains Mono';
+    ctx.fillText('mirror', 780, mirrorY+16);
+    const pts = samplePoints();
+    pts.forEach(x=>{
+      const a = pathAngle(x,t);
+      const cy=70, r=9;
+      ctx.strokeStyle=COL.lineSoft; ctx.beginPath(); ctx.arc(x,cy,r,0,Math.PI*2); ctx.stroke();
+      const hx=x+r*Math.cos(a), hy=cy-r*Math.sin(a);
+      ctx.strokeStyle=COL.accent; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(x,cy); ctx.lineTo(hx,hy); ctx.stroke();
+      ctx.strokeStyle = mirrorMode==='near' ? COL.accentSoft : 'rgba(140,160,185,0.12)';
+      ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,cy+r); ctx.lineTo(x,mirrorY); ctx.stroke();
+    });
+
+    // chain sum, bottom half
+    const baseX=90, baseY=250, seg=13;
+    let cx=baseX, cy2=baseY;
+    ctx.strokeStyle=COL.dim; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.lineTo(baseX,baseY-1); ctx.stroke();
+    ctx.beginPath();
+    ctx.strokeStyle=COL.accentSoft;
+    let first=true;
+    pts.forEach(x=>{
+      const a = pathAngle(x,t);
+      const nx = cx+seg*Math.cos(a), ny = cy2-seg*Math.sin(a);
+      ctx.moveTo(cx,cy2); ctx.lineTo(nx,ny);
+      cx=nx; cy2=ny;
+    });
+    ctx.stroke();
+    ctx.strokeStyle=COL.accent; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.lineTo(cx,cy2); ctx.stroke();
+    dot(ctx,cx,cy2,4.5,COL.accentB);
+    const mag = Math.hypot(cx-baseX, cy2-baseY);
+    ctx.fillStyle=COL.dim; ctx.font='11px JetBrains Mono';
+    ctx.fillText((mirrorMode==='all'?'all '+pts.length:'near-only '+pts.length)+' paths — net amplitude ≈ '+mag.toFixed(1)+' / '+(pts.length*seg).toFixed(0)+' possible', baseX, baseY+26);
+  }
+
+  // ---------- Panel 3: double slit ----------
+  const PS = ctxOf('cSlit');
+  const slitSep=44, screenDist=520, lambda2=2.7;
+  function intensityAt(y){
+    const l1 = Math.hypot(screenDist, y-slitSep/2);
+    const l2 = Math.hypot(screenDist, y+slitSep/2);
+    const a1 = (l1/lambda2)*Math.PI*2;
+    const a2 = (l2/lambda2)*Math.PI*2;
+    const rx = Math.cos(a1)+Math.cos(a2), ry = Math.sin(a1)+Math.sin(a2);
+    return {mag2: rx*rx+ry*ry, a1, a2};
+  }
+  function drawSlit(t){
+    clear(PS); const ctx=PS.ctx;
+    const x0=60, y0=150, w=560, hRange=130;
+    ctx.strokeStyle=COL.lineSoft; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0+w,y0); ctx.stroke();
+    let maxI=4;
+    ctx.strokeStyle=COL.accent; ctx.lineWidth=2; ctx.beginPath();
+    for(let px=0; px<=w; px+=2){
+      const y = -hRange + (px/w)*2*hRange;
+      const I = intensityAt(y).mag2/maxI;
+      const cy = y0 - I*100;
+      const cx = x0+px;
+      if(px===0) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
+    }
+    ctx.stroke();
+
+    const period=6.0;
+    const phase=(t%period)/period;
+    const yNow = -hRange + phase*2*hRange;
+    const cxNow = x0 + ((yNow+hRange)/(2*hRange))*w;
+    const info = intensityAt(yNow);
+    const cyNow = y0 - (info.mag2/maxI)*100;
+    ctx.strokeStyle=COL.lineSoft; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(cxNow,y0); ctx.lineTo(cxNow,cyNow); ctx.stroke();
+    ctx.setLineDash([]);
+    dot(ctx,cxNow,cyNow,4,COL.accentB);
+
+    // vector addition diagram, top right
+    const vx=750, vy=70, L=34;
+    ctx.strokeStyle=COL.lineSoft; ctx.beginPath(); ctx.arc(vx,vy,L+6,0,Math.PI*2); ctx.stroke();
+    const p1x=vx+L*Math.cos(info.a1), p1y=vy-L*Math.sin(info.a1);
+    ctx.strokeStyle=COL.dim; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(vx,vy); ctx.lineTo(p1x,p1y); ctx.stroke();
+    const p2x=p1x+L*Math.cos(info.a2), p2y=p1y-L*Math.sin(info.a2);
+    ctx.strokeStyle=COL.accentSoft;
+    ctx.beginPath(); ctx.moveTo(p1x,p1y); ctx.lineTo(p2x,p2y); ctx.stroke();
+    ctx.strokeStyle=COL.accent; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(vx,vy); ctx.lineTo(p2x,p2y); ctx.stroke();
+    dot(ctx,p2x,p2y,4,COL.accentB);
+    ctx.fillStyle=COL.dim; ctx.font='10.5px JetBrains Mono';
+    ctx.fillText('slit 1 + slit 2 arrows', vx-52, vy+L+30);
+  }
+
+  function loop(now){
+    const t = now/1000;
+    drawMirror(t);
+    drawSlit(t);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

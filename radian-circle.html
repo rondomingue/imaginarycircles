@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imaginary Circles — 01 The Radian Circle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: hsl(215, 26%, 7%);
+    --bg-elevated: hsl(215, 24%, 10%);
+    --cell: hsl(215, 22%, 12%);
+    --line: hsl(215, 18%, 22%);
+    --line-soft: hsl(215, 18%, 16%);
+    --ink: hsl(210, 32%, 93%);
+    --ink-dim: hsl(212, 15%, 58%);
+    --ink-faint: hsl(212, 14%, 38%);
+    --accent: hsl(199, 92%, 62%);
+    --accent-dim: hsl(199, 60%, 30%);
+    --accent-glow: hsla(199, 92%, 62%, 0.35);
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink); font-family:var(--mono);}
+  body{
+    padding: 48px 24px 96px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:1040px; margin:0 auto;}
+
+  /* ---------- header ---------- */
+  header{margin-bottom:56px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--accent);}
+  h1{
+    font-family:var(--display); font-weight:700; font-size:clamp(36px,6vw,64px);
+    letter-spacing:-0.02em; line-height:1; color:var(--ink); margin-bottom:16px;
+  }
+  h1 span{color:var(--ink-faint);}
+  .sub{
+    font-family:var(--display); font-size:16px; color:var(--ink-dim); max-width:560px; line-height:1.55; font-weight:400;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    display:grid; grid-template-columns: minmax(280px,440px) 1fr; gap:40px;
+    background:var(--bg-elevated); border:1px solid var(--line-soft); border-radius:2px;
+    padding:32px; margin-bottom:64px;
+  }
+  @media (max-width:760px){ .hero{grid-template-columns:1fr;} }
+
+  .dial-wrap{position:relative; width:100%; aspect-ratio:1/1;}
+  svg{width:100%; height:100%; touch-action:none; cursor:crosshair; overflow:visible;}
+  .ring{fill:none; stroke:var(--line); stroke-width:1;}
+  .axis{stroke:var(--line-soft); stroke-width:1;}
+  .sweep{fill:var(--accent); fill-opacity:0.07; stroke:none;}
+  .sweep-edge{stroke:var(--accent); stroke-opacity:0.35; stroke-width:1; fill:none;}
+  .radius{stroke:var(--accent); stroke-width:1.6; stroke-linecap:round;}
+  .point{fill:var(--accent);}
+  .point-glow{fill:var(--accent); opacity:0.25;}
+  .tick{stroke:var(--ink-faint); stroke-width:1;}
+  .tick-label{font-family:var(--mono); font-size:10px; fill:var(--ink-faint);}
+  .unit-arc{fill:none; stroke:var(--ink-dim); stroke-width:2;}
+  .unit-arc-tag{font-family:var(--mono); font-size:10.5px; fill:var(--ink-dim); letter-spacing:0.02em;}
+
+  .readout{display:flex; flex-direction:column; justify-content:center; gap:22px;}
+  .readout-row{border-bottom:1px solid var(--line-soft); padding-bottom:16px;}
+  .readout-row:last-child{border-bottom:none; padding-bottom:0;}
+  .readout-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom:8px;
+  }
+  .readout-value{
+    font-family:var(--display); font-size:clamp(28px,4vw,40px); font-weight:600; color:var(--ink);
+    line-height:1; display:flex; align-items:baseline; gap:12px;
+  }
+  .readout-value small{font-family:var(--mono); font-size:14px; color:var(--ink-dim); font-weight:400;}
+  .readout-value.accent{color:var(--accent);}
+  .coord{font-family:var(--mono); font-size:16px; color:var(--ink-dim);}
+  .coord b{color:var(--ink);}
+  .hint{font-family:var(--display); font-size:13px; color:var(--ink-faint); line-height:1.5;}
+
+  /* ---------- grid section ---------- */
+  .grid-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:8px;}
+  .grid-title{font-family:var(--display); font-size:20px; font-weight:600;}
+  .grid-count{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+
+  .table{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:1px;
+    background:var(--line-soft); border:1px solid var(--line-soft);
+  }
+  @media (max-width:640px){ .table{grid-template-columns:repeat(2,1fr);} }
+
+  .cellbtn{
+    background:var(--cell); border:none; color:var(--ink); text-align:left;
+    padding:16px 14px; cursor:pointer; font-family:var(--mono);
+    display:flex; flex-direction:column; gap:10px; min-height:118px;
+    transition:background 0.15s ease;
+    position:relative;
+  }
+  .cellbtn:hover{background:hsl(215,22%,15%);}
+  .cellbtn.active{background:var(--bg); box-shadow: inset 0 0 0 1.5px var(--accent);}
+  .cellbtn.active::after{
+    content:''; position:absolute; inset:0; box-shadow:0 0 24px -4px var(--accent-glow); pointer-events:none;
+  }
+  .cell-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .cell-deg{font-size:11px; color:var(--ink-faint);}
+  .cellbtn.active .cell-deg{color:var(--accent);}
+  .cell-sym{font-family:var(--display); font-size:22px; font-weight:600; color:var(--ink); letter-spacing:-0.01em;}
+  .cellbtn.active .cell-sym{color:var(--accent);}
+  .cell-dec{font-size:10.5px; color:var(--ink-dim);}
+  .cell-xy{font-size:10px; color:var(--ink-faint); margin-top:auto;}
+
+  footer{margin-top:56px; font-family:var(--display); font-size:12.5px; color:var(--ink-faint); line-height:1.7; max-width:640px;}
+  footer b{color:var(--ink-dim); font-weight:600;}
+
+  .seriesnav{max-width:1040px;margin:0 auto 40px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px; padding-bottom:16px; border-bottom:1px solid var(--line-soft);}
+  .seriesnav-label{font-family:var(--display); font-weight:600; font-size:13px; letter-spacing:0.02em; color:var(--ink); white-space:nowrap;}
+  .seriesnav-links{display:flex; flex-wrap:wrap; gap:4px 18px;}
+  .seriesnav-links a{font-family:var(--mono); font-size:12px; color:var(--ink-dim); text-decoration:none; border-bottom:1px solid transparent; padding-bottom:2px; transition:color .15s ease,border-color .15s ease;}
+  .seriesnav-links a:hover{color:var(--ink);}
+  .seriesnav-links a.current{color:var(--accent); border-color:var(--accent);}
+</style>
+</head>
+<body>
+<nav class="seriesnav">
+  <span class="seriesnav-label">Imaginary Circles</span>
+  <div class="seriesnav-links">
+    <a href="radian-circle.html" class="current">01 · The Radian Circle</a>
+    <a href="circle-to-wave.html">02 · Circle → Wave → Fourier → Schrödinger</a>
+    <a href="euler-imaginary.html">03 · e, i & Quantum Mechanics</a>
+    <a href="pi-ubiquity.html">04 · The Ubiquity of Pi</a>
+    <a href="feynman-clocks.html">05 · Feynman's Rotating Clocks</a>
+  </div>
+</nav>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">2π radians = 360°</div>
+    <h1>The Radian<br><span>Circle</span></h1>
+    <p class="sub">A radian is the angle made when the arc equals the radius. Drag the point, or select any of the sixteen principal angles below to see it measured both ways.</p>
+  </header>
+
+  <section class="hero">
+    <div class="dial-wrap">
+      <svg id="dial" viewBox="-20 -20 480 480">
+        <line class="axis" x1="220" y1="20" x2="220" y2="420"></line>
+        <line class="axis" x1="20" y1="220" x2="420" y2="220"></line>
+        <circle class="ring" cx="220" cy="220" r="160"></circle>
+
+        <!-- reference arc: one radius laid along the circumference, the literal definition -->
+        <path id="unitArc" class="unit-arc" d=""></path>
+        <text id="unitArcTag" class="unit-arc-tag"></text>
+
+        <path id="sweep" class="sweep" d=""></path>
+        <path id="sweepEdge" class="sweep-edge" d=""></path>
+        <line id="radius" class="radius" x1="220" y1="220" x2="380" y2="220"></line>
+        <circle id="pointGlow" class="point-glow" cx="380" cy="220" r="12"></circle>
+        <circle id="point" class="point" cx="380" cy="220" r="4.5"></circle>
+      </svg>
+    </div>
+
+    <div class="readout">
+      <div class="readout-row">
+        <div class="readout-label">Angle in radians</div>
+        <div class="readout-value accent" id="radLabel">0<small id="radDec">0.000 rad</small></div>
+      </div>
+      <div class="readout-row">
+        <div class="readout-label">Angle in degrees</div>
+        <div class="readout-value" id="degLabel">0°</div>
+      </div>
+      <div class="readout-row">
+        <div class="readout-label">Coordinates on the unit circle</div>
+        <div class="coord">( cos θ, sin θ ) = ( <b id="cosVal">1.000</b>, <b id="sinVal">0.000</b> )</div>
+      </div>
+      <p class="hint">The short gray arc near 0° is exactly one radius long — that curved distance is what defines one radian, no matter where on the circle you measure it from.</p>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="grid-head">
+      <div class="grid-title">Sixteen principal angles</div>
+      <div class="grid-count">deg · fraction of π · decimal rad · (cos, sin)</div>
+    </div>
+    <div class="table" id="table"></div>
+  </section>
+
+  <footer>
+    <b>Reading a cell:</b> the small top-left number is degrees, the large center symbol is the radian value as a fraction of π, and the bottom row gives the exact coordinate where that angle meets the unit circle.
+  </footer>
+
+</div>
+
+<script>
+  const angles = [
+    {deg:0,   sym:"0",        cos:"1",        sin:"0",        cosD:1,               sinD:0},
+    {deg:30,  sym:"π/6",      cos:"√3/2",     sin:"1/2",      cosD:Math.sqrt(3)/2,  sinD:0.5},
+    {deg:45,  sym:"π/4",      cos:"√2/2",     sin:"√2/2",     cosD:Math.sqrt(2)/2,  sinD:Math.sqrt(2)/2},
+    {deg:60,  sym:"π/3",      cos:"1/2",      sin:"√3/2",     cosD:0.5,             sinD:Math.sqrt(3)/2},
+    {deg:90,  sym:"π/2",      cos:"0",        sin:"1",        cosD:0,               sinD:1},
+    {deg:120, sym:"2π/3",     cos:"-1/2",     sin:"√3/2",     cosD:-0.5,            sinD:Math.sqrt(3)/2},
+    {deg:135, sym:"3π/4",     cos:"-√2/2",    sin:"√2/2",     cosD:-Math.sqrt(2)/2, sinD:Math.sqrt(2)/2},
+    {deg:150, sym:"5π/6",     cos:"-√3/2",    sin:"1/2",      cosD:-Math.sqrt(3)/2, sinD:0.5},
+    {deg:180, sym:"π",        cos:"-1",       sin:"0",        cosD:-1,              sinD:0},
+    {deg:210, sym:"7π/6",     cos:"-√3/2",    sin:"-1/2",     cosD:-Math.sqrt(3)/2, sinD:-0.5},
+    {deg:225, sym:"5π/4",     cos:"-√2/2",    sin:"-√2/2",    cosD:-Math.sqrt(2)/2, sinD:-Math.sqrt(2)/2},
+    {deg:240, sym:"4π/3",     cos:"-1/2",     sin:"-√3/2",    cosD:-0.5,            sinD:-Math.sqrt(3)/2},
+    {deg:270, sym:"3π/2",     cos:"0",        sin:"-1",       cosD:0,               sinD:-1},
+    {deg:300, sym:"5π/3",     cos:"1/2",      sin:"-√3/2",    cosD:0.5,             sinD:-Math.sqrt(3)/2},
+    {deg:315, sym:"7π/4",     cos:"√2/2",     sin:"-√2/2",    cosD:Math.sqrt(2)/2,  sinD:-Math.sqrt(2)/2},
+    {deg:330, sym:"11π/6",    cos:"√3/2",     sin:"-1/2",     cosD:Math.sqrt(3)/2,  sinD:-0.5},
+  ];
+
+  const cx = 220, cy = 220, R = 160;
+  const table = document.getElementById('table');
+  const dial = document.getElementById('dial');
+  const radiusEl = document.getElementById('radius');
+  const pointEl = document.getElementById('point');
+  const pointGlowEl = document.getElementById('pointGlow');
+  const sweepEl = document.getElementById('sweep');
+  const sweepEdgeEl = document.getElementById('sweepEdge');
+  const radLabel = document.getElementById('radLabel');
+  const radDec = document.getElementById('radDec');
+  const degLabel = document.getElementById('degLabel');
+  const cosVal = document.getElementById('cosVal');
+  const sinVal = document.getElementById('sinVal');
+
+  let theta = 0; // radians, standard math convention
+  let cells = [];
+
+  function toXY(t){
+    return { x: cx + R*Math.cos(t), y: cy - R*Math.sin(t) };
+  }
+
+  function arcPath(t, r){
+    // sweep path from angle 0 to t, as a filled wedge
+    const p0 = { x: cx + r*Math.cos(0), y: cy - r*Math.sin(0) };
+    const p1 = { x: cx + r*Math.cos(t), y: cy - r*Math.sin(t) };
+    const large = Math.abs(t) > Math.PI ? 1 : 0;
+    const sweepFlag = t >= 0 ? 0 : 1;
+    return `M ${cx} ${cy} L ${p0.x} ${p0.y} A ${r} ${r} 0 ${large} ${sweepFlag} ${p1.x} ${p1.y} Z`;
+  }
+  function edgePath(t, r){
+    const p0 = { x: cx + r*Math.cos(0), y: cy - r*Math.sin(0) };
+    const p1 = { x: cx + r*Math.cos(t), y: cy - r*Math.sin(t) };
+    const large = Math.abs(t) > Math.PI ? 1 : 0;
+    const sweepFlag = t >= 0 ? 0 : 1;
+    return `M ${p0.x} ${p0.y} A ${r} ${r} 0 ${large} ${sweepFlag} ${p1.x} ${p1.y}`;
+  }
+
+  function render(t, activeDeg){
+    const p = toXY(t);
+    radiusEl.setAttribute('x2', p.x); radiusEl.setAttribute('y2', p.y);
+    pointEl.setAttribute('cx', p.x); pointEl.setAttribute('cy', p.y);
+    pointGlowEl.setAttribute('cx', p.x); pointGlowEl.setAttribute('cy', p.y);
+    sweepEl.setAttribute('d', arcPath(t, R));
+    sweepEdgeEl.setAttribute('d', edgePath(t, R));
+
+    let deg = (t * 180/Math.PI);
+    deg = ((deg % 360)+360)%360;
+    const rad = t;
+    degLabel.textContent = Math.round(deg) + '°';
+    radDec.textContent = rad.toFixed(3) + ' rad';
+    cosVal.textContent = Math.cos(t).toFixed(3);
+    sinVal.textContent = Math.sin(t).toFixed(3);
+
+    const match = angles.find(a => a.deg === Math.round(deg));
+    radLabel.childNodes[0].textContent = match ? match.sym : deg.toFixed(0) + '°';
+
+    cells.forEach(c => c.classList.toggle('active', activeDeg !== undefined && Number(c.dataset.deg) === activeDeg));
+  }
+
+  // one-radian reference arc near angle 0, drawn as literal arc-length = radius
+  (function drawUnitArc(){
+    const oneRad = 1; // radian
+    const start = toXY(0);
+    const end = toXY(oneRad);
+    const path = document.getElementById('unitArc');
+    path.setAttribute('d', `M ${start.x} ${start.y} A ${R} ${R} 0 0 0 ${end.x} ${end.y}`);
+    const mid = toXY(oneRad/2);
+    const tagX = cx + (R+22)*Math.cos(oneRad/2);
+    const tagY = cy - (R+22)*Math.sin(oneRad/2);
+    const tag = document.getElementById('unitArcTag');
+    tag.setAttribute('x', tagX); tag.setAttribute('y', tagY);
+    tag.textContent = '1 rad ≈ 57.3°';
+  })();
+
+  // build grid
+  angles.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'cellbtn';
+    btn.dataset.deg = a.deg;
+    btn.innerHTML = `
+      <div class="cell-top"><span class="cell-deg">${a.deg}°</span></div>
+      <div class="cell-sym">${a.sym}</div>
+      <div class="cell-dec">${(a.deg*Math.PI/180).toFixed(3)} rad</div>
+      <div class="cell-xy">(${a.cos}, ${a.sin})</div>
+    `;
+    btn.addEventListener('click', () => animateTo(a.deg * Math.PI/180, a.deg));
+    table.appendChild(btn);
+  });
+  cells = Array.from(document.querySelectorAll('.cellbtn'));
+
+  function animateTo(target, activeDeg){
+    const start = theta;
+    let diff = target - start;
+    // shortest path
+    while (diff > Math.PI) diff -= 2*Math.PI;
+    while (diff < -Math.PI) diff += 2*Math.PI;
+    const t0 = performance.now();
+    const dur = 420;
+    function step(now){
+      const p = Math.min(1, (now - t0)/dur);
+      const ease = 1 - Math.pow(1-p, 3);
+      theta = start + diff*ease;
+      render(theta, activeDeg);
+      if (p < 1) requestAnimationFrame(step);
+      else { theta = target; render(theta, activeDeg); }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // drag interaction, snaps to nearest of the 16 angles
+  let dragging = false;
+  function angleFromEvent(evt){
+    const rect = dial.getBoundingClientRect();
+    const vb = dial.viewBox.baseVal;
+    const px = ((evt.clientX - rect.left) / rect.width) * vb.width + vb.x;
+    const py = ((evt.clientY - rect.top) / rect.height) * vb.height + vb.y;
+    const dx = px - cx, dy = cy - py;
+    return Math.atan2(dy, dx);
+  }
+  function nearestAngle(t){
+    let deg = (t*180/Math.PI); deg = ((deg%360)+360)%360;
+    let best = angles[0], bestDiff = 999;
+    angles.forEach(a => {
+      let d = Math.abs(a.deg - deg);
+      d = Math.min(d, 360-d);
+      if (d < bestDiff){ bestDiff = d; best = a; }
+    });
+    return best;
+  }
+  function pointerHandler(evt){
+    if (!dragging) return;
+    const t = angleFromEvent(evt);
+    let deg = (t*180/Math.PI); deg = ((deg%360)+360)%360;
+    render(deg*Math.PI/180, undefined);
+  }
+  dial.addEventListener('pointerdown', (e)=>{ dragging = true; dial.setPointerCapture(e.pointerId); pointerHandler(e); });
+  dial.addEventListener('pointermove', pointerHandler);
+  dial.addEventListener('pointerup', (e)=>{
+    dragging = false;
+    const t = angleFromEvent(e);
+    const near = nearestAngle(t);
+    animateTo(near.deg*Math.PI/180, near.deg);
+  });
+
+  render(0, 0);
+</script>
+</body>
+</html>
