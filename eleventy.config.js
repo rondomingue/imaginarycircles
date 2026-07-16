@@ -15,7 +15,7 @@ function seriesNav(activeSlug) {
   return parts
     .map((p) => {
       const active = p.slug === activeSlug ? " is-active" : "";
-      return `<a class="site-serieslink${active}" href="/${p.slug}.html">` +
+      return `<a class="site-serieslink${active}" href="${p.slug}.html">` +
         `<span class="site-serieslink-num">${p.num}</span>` +
         `<span class="site-serieslink-title">${p.title}</span></a>`;
     })
@@ -44,8 +44,8 @@ export default function (eleventyConfig) {
 
     // 2. head assets
     const head =
-      '<link rel="stylesheet" href="/assets/chrome.css">\n' +
-      '<script src="/assets/chrome.js" defer></script>\n';
+      '<link rel="stylesheet" href="assets/chrome.css">\n' +
+      '<script src="assets/chrome.js" defer></script>\n';
     if (/<\/head>/i.test(html)) {
       html = html.replace(/<\/head>/i, head + "</head>");
     }
