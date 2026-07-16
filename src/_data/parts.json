@@ -1,0 +1,32 @@
+[
+  {
+    "num": "01",
+    "slug": "radian-circle",
+    "title": "The Radian Circle",
+    "blurb": "A radian is the angle where the arc equals the radius. Drag the point through the sixteen principal angles and watch it measured both ways."
+  },
+  {
+    "num": "02",
+    "slug": "circle-to-wave",
+    "title": "Circle → Wave → Fourier → Schrödinger",
+    "blurb": "One rotating point generates every sine wave, builds arbitrary signals as a Fourier series, and carries a quantum state's phase through time."
+  },
+  {
+    "num": "03",
+    "slug": "euler-imaginary",
+    "title": "e, i, and the Long Detour into Quantum Mechanics",
+    "blurb": "Compound interest and an unsolved cubic gave us e and i — four centuries later they turned out to be the native language of quantum theory."
+  },
+  {
+    "num": "04",
+    "slug": "pi-ubiquity",
+    "title": "The Ubiquity of Pi",
+    "blurb": "Pi begins as circumference over diameter, then surfaces in coin flips, factorials, needle drops, and the floor of quantum uncertainty."
+  },
+  {
+    "num": "05",
+    "slug": "feynman-clocks",
+    "title": "Feynman's Rotating Clocks",
+    "blurb": "Feynman explained quantum electrodynamics with spinning arrows: sum a clock hand for every path, and its length gives the probability."
+  }
+]

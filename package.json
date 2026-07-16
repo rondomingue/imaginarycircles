@@ -1,0 +1,15 @@
+{
+  "name": "imaginarycircles",
+  "version": "1.0.0",
+  "description": "Imaginary Circles — an interactive series on radians, waves, e, i, pi, and quantum mechanics.",
+  "type": "module",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy",
+    "clean": "rm -rf _site"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

@@ -1,0 +1,130 @@
+/* ============================================================
+   Unified site chrome: header, footer, sliding sidebar.
+   Reuses each page's design tokens (--bg, --accent, ...) with
+   fallbacks so it stays consistent even on a page that doesn't
+   define them.
+   ============================================================ */
+:root{
+  --chrome-bg:        var(--bg-elevated, hsl(215, 24%, 10%));
+  --chrome-line:      var(--line-soft, hsl(215, 18%, 16%));
+  --chrome-ink:       var(--ink, hsl(210, 32%, 93%));
+  --chrome-ink-dim:   var(--ink-dim, hsl(212, 15%, 58%));
+  --chrome-ink-faint: var(--ink-faint, hsl(212, 14%, 38%));
+  --chrome-accent:    var(--accent, hsl(199, 92%, 62%));
+  --chrome-accent-b:  var(--accent-b, hsl(174, 70%, 55%));
+  --chrome-display:   var(--display, 'Space Grotesk', sans-serif);
+  --chrome-mono:      var(--mono, 'JetBrains Mono', monospace);
+  --chrome-h:         56px;
+  --chrome-sidebar-w: 320px;
+}
+
+/* Make room for the fixed header, and turn the body into a column so the
+   footer can be pushed to the bottom of the viewport on short pages
+   (sticky footer). Overrides each page's own body padding uniformly. */
+body{
+  padding-top:var(--chrome-h) !important; padding-bottom:0 !important;
+  display:flex; flex-direction:column;
+  min-height:100vh; min-height:100dvh;
+}
+/* keep each page's centered content block from being stretched by the flex column */
+body > *{ flex-shrink:0; }
+
+/* ---------- header ---------- */
+.site-header{
+  position:fixed; top:0; left:0; right:0; z-index:80;
+  display:flex; align-items:center; gap:16px;
+  height:var(--chrome-h); padding:0 20px;
+  background:color-mix(in srgb, var(--chrome-bg) 88%, transparent);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--chrome-line);
+  font-family:var(--chrome-mono);
+}
+.site-hamburger{
+  display:flex; flex-direction:column; justify-content:center; gap:4px;
+  width:34px; height:34px; padding:7px; cursor:pointer;
+  background:transparent; border:1px solid var(--chrome-line); border-radius:4px;
+  transition:border-color 0.15s ease, background 0.15s ease;
+}
+.site-hamburger:hover{ border-color:var(--chrome-accent); background:color-mix(in srgb, var(--chrome-accent) 10%, transparent); }
+.site-hamburger span{ display:block; height:1.5px; width:100%; background:var(--chrome-ink); border-radius:2px; transition:transform 0.2s ease, opacity 0.2s ease; }
+.site-brand{
+  font-family:var(--chrome-display); font-weight:700; font-size:16px;
+  letter-spacing:-0.01em; color:var(--chrome-ink); text-decoration:none;
+}
+.site-brand span{ color:var(--chrome-accent-b); }
+.site-header-link{
+  margin-left:auto; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--chrome-ink-faint); text-decoration:none; transition:color 0.15s ease;
+}
+.site-header-link:hover{ color:var(--chrome-accent); }
+
+/* ---------- overlay ---------- */
+.site-overlay{
+  position:fixed; inset:0; z-index:90;
+  background:hsla(215, 40%, 3%, 0.6);
+  opacity:0; pointer-events:none; transition:opacity 0.25s ease;
+}
+.site-overlay.is-open{ opacity:1; pointer-events:auto; }
+
+/* ---------- sidebar ---------- */
+.site-sidebar{
+  position:fixed; top:0; left:0; z-index:100;
+  display:flex; flex-direction:column;
+  width:min(var(--chrome-sidebar-w), 86vw); height:100dvh;
+  background:var(--chrome-bg); border-right:1px solid var(--chrome-line);
+  font-family:var(--chrome-mono);
+  transform:translateX(-100%); transition:transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y:auto;
+}
+.site-sidebar.is-open{ transform:translateX(0); box-shadow:24px 0 60px hsla(215, 40%, 3%, 0.5); }
+.site-sidebar-head{
+  display:flex; align-items:center; justify-content:space-between;
+  height:var(--chrome-h); padding:0 18px 0 22px;
+  border-bottom:1px solid var(--chrome-line);
+}
+.site-sidebar-title{
+  font-size:11.5px; letter-spacing:0.18em; text-transform:uppercase; color:var(--chrome-accent);
+}
+.site-sidebar-close{
+  background:transparent; border:none; color:var(--chrome-ink-dim);
+  font-size:26px; line-height:1; cursor:pointer; padding:4px 6px; transition:color 0.15s ease;
+}
+.site-sidebar-close:hover{ color:var(--chrome-ink); }
+
+.site-series{ display:flex; flex-direction:column; padding:8px 0; }
+.site-serieslink{
+  display:grid; grid-template-columns:30px 1fr; gap:12px; align-items:baseline;
+  padding:14px 22px; text-decoration:none; color:var(--chrome-ink-dim);
+  border-left:2px solid transparent; transition:background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.site-serieslink:hover{ background:color-mix(in srgb, var(--chrome-accent) 8%, transparent); color:var(--chrome-ink); }
+.site-serieslink.is-active{ color:var(--chrome-ink); border-left-color:var(--chrome-accent); background:color-mix(in srgb, var(--chrome-accent) 6%, transparent); }
+.site-serieslink-num{ font-family:var(--chrome-display); font-weight:700; font-size:15px; color:var(--chrome-ink-faint); }
+.site-serieslink.is-active .site-serieslink-num{ color:var(--chrome-accent-b); }
+.site-serieslink-title{ font-size:13px; line-height:1.45; }
+.site-sidebar-foot{
+  margin-top:auto; padding:18px 22px 24px;
+  font-size:11px; line-height:1.6; color:var(--chrome-ink-faint);
+  border-top:1px solid var(--chrome-line);
+}
+
+/* ---------- footer ---------- */
+.site-footer{
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px;
+  padding:28px 24px; margin:auto -24px 0;   /* margin-top:auto pins it to the bottom; break out of the 24px gutters */
+  border-top:1px solid var(--chrome-line);
+  font-family:var(--chrome-mono); font-size:11.5px; color:var(--chrome-ink-faint);
+}
+.site-footer-brand{ font-family:var(--chrome-display); font-weight:600; color:var(--chrome-ink-dim); letter-spacing:0.02em; }
+.site-footer-by{ color:var(--chrome-ink-faint); }
+.site-footer-by a{ color:var(--chrome-accent-b); border-bottom-color:transparent; }
+.site-footer-by a:hover{ color:var(--chrome-accent); }
+.site-footer-note{ color:var(--chrome-ink-faint); }
+.site-footer-meta{ margin-left:auto; }
+.site-footer a{ color:var(--chrome-ink-dim); text-decoration:none; border-bottom:1px solid var(--chrome-line); }
+.site-footer a:hover{ color:var(--chrome-accent); }
+
+/* keep the sidebar usable when the OS asks for reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .site-sidebar, .site-overlay{ transition:none; }
+}
