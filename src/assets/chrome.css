@@ -22,7 +22,7 @@
    footer can be pushed to the bottom of the viewport on short pages
    (sticky footer). Overrides each page's own body padding uniformly. */
 body{
-  padding-top:var(--chrome-h) !important; padding-bottom:0 !important;
+  padding-top:calc(var(--chrome-h) + 48px) !important; padding-bottom:0 !important;
   display:flex; flex-direction:column;
   min-height:100vh; min-height:100dvh;
 }
