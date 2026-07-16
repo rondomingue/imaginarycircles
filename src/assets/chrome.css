@@ -30,6 +30,15 @@ body{
 /* keep each page's centered content block from being stretched by the flex column */
 body > *{ flex-shrink:0; }
 
+/* Guard the injected chrome from each page's own bare element rules
+   (e.g. `footer{max-width:660px}`, `header{margin-bottom:56px}`), which
+   would otherwise leak into any property the chrome doesn't declare.
+   Class beats element specificity; the rules below re-set what they need. */
+.site-header, .site-footer, .site-sidebar, .site-overlay{
+  margin:0; padding:0; max-width:none; min-width:0; width:auto;
+  line-height:1.5; letter-spacing:normal;
+}
+
 /* ---------- header ---------- */
 .site-header{
   position:fixed; top:0; left:0; right:0; z-index:80;
