@@ -15,6 +15,7 @@
   --chrome-display:   var(--display, 'Space Grotesk', sans-serif);
   --chrome-mono:      var(--mono, 'JetBrains Mono', monospace);
   --chrome-h:         56px;
+  --chrome-content-gap: 80px;   /* breathing room between header and page content */
   --chrome-sidebar-w: 320px;
 }
 
@@ -22,7 +23,7 @@
    footer can be pushed to the bottom of the viewport on short pages
    (sticky footer). Overrides each page's own body padding uniformly. */
 body{
-  padding-top:calc(var(--chrome-h) + 48px) !important; padding-bottom:0 !important;
+  padding-top:calc(var(--chrome-h) + var(--chrome-content-gap)) !important; padding-bottom:0 !important;
   display:flex; flex-direction:column;
   min-height:100vh; min-height:100dvh;
 }
