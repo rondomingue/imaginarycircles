@@ -42,9 +42,14 @@ export default function (eleventyConfig) {
     // 1. drop the old per-page series nav
     let html = content.replace(/<nav class="seriesnav">[\s\S]*?<\/nav>\s*/i, "");
 
-    // 2. head assets
+    // 2. head assets — shared chrome + a serif math font (STIX Two Text)
+    //    and the equation typography that uses it.
     const head =
       '<link rel="stylesheet" href="assets/chrome.css">\n' +
+      '<link rel="stylesheet" href="assets/math.css">\n' +
+      '<link rel="stylesheet" href="assets/theme.css">\n' +
+      '<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">\n' +
+      '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">\n' +
       '<script src="assets/chrome.js" defer></script>\n';
     if (/<\/head>/i.test(html)) {
       html = html.replace(/<\/head>/i, head + "</head>");

@@ -1,0 +1,179 @@
+/* ============================================================
+   Theme layer — lifts the shared panel template out of the
+   generic "dark dev-doc" look into something bespoke to the
+   subject: the complex plane.
+
+   Injected on every page after each page's own <style> (and after
+   chrome.css / math.css), so it refines the duplicated .panel /
+   .card / timeline styles in one place instead of five.
+
+   Three moves do most of the work:
+     1. an atmospheric background — a faint concentric-circle field
+        (the "imaginary circles" motif) plus soft accent glows, so
+        content floats in a space instead of sitting on flat black;
+     2. glassy, rounded, shadowed cards with a gradient top hairline,
+        replacing the uniform 1px boxes;
+     3. index numerals set in italic STIX with a cyan→teal gradient,
+        turning the numbering into a typographic signature.
+   ============================================================ */
+
+/* ---------- type system ----------
+   Every page references two font variables — --display for headings
+   and --mono for body/labels. Redefining them here (this :root loads
+   after each page's own :root) re-skins the whole series at once,
+   without touching the five panel files.
+
+     headings -> Fraunces        (an expressive editorial display serif)
+     body     -> Instrument Sans (a clean, slightly warm text sans)
+     math     -> STIX Two Text   (unchanged; set in math.css)
+
+   The variable named --mono is no longer monospace, but keeping the
+   name means every existing `var(--mono)` reference picks up the new
+   body sans for free. Headings (--display) and equations (--math)
+   stay serif, so the page keeps its editorial feel while paragraphs
+   read as a comfortable sans. */
+:root{
+  --display: 'Fraunces', Georgia, serif;
+  --mono:    'Instrument Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* Paragraph / prose text -> sans. These classes are a mix of
+   var(--display) and var(--mono) in the source, so set the family
+   explicitly rather than relying on either variable. Headings
+   (.panel-title, .card-title, .tl-title, h1) keep Fraunces. */
+.sub, .panel-text, .tl-desc, .card-blurb, .page > footer{
+  font-family:var(--mono) !important;
+}
+/* Reading sizes for the body sans. */
+.sub{ font-size:16.5px !important; line-height:1.6 !important; }
+.panel-text{ font-size:13.5px !important; line-height:1.62 !important; }
+.card-blurb{ font-size:14px !important; line-height:1.6 !important; }
+.tl-desc{ font-size:13px !important; line-height:1.58 !important; }
+/* small tracked labels lose the mono look but keep their label feel */
+.eyebrow{ font-weight:500; }
+.caption, .readout{ letter-spacing:0 !important; }
+
+/* ---------- atmospheric background ---------- */
+body{
+  background:
+    radial-gradient(1200px 700px at 18% -8%,  hsla(199, 92%, 55%, 0.10), transparent 60%),
+    radial-gradient(1000px 800px at 100% 108%, hsla(174, 70%, 50%, 0.08), transparent 55%),
+    linear-gradient(180deg, hsl(216, 30%, 8%), hsl(217, 33%, 6%)) !important;
+}
+/* Concentric rings radiating from the top — faint, fixed, thematic.
+   Sits above the body fill but behind all content. */
+body::before{
+  content:''; position:fixed; inset:-10% -10% 0; z-index:-1; pointer-events:none;
+  background:
+    repeating-radial-gradient(circle at 50% -4%,
+      transparent 0 71px,
+      hsla(205, 60%, 72%, 0.035) 71px 72px);
+  -webkit-mask-image:linear-gradient(180deg, #000 0%, transparent 78%);
+          mask-image:linear-gradient(180deg, #000 0%, transparent 78%);
+}
+
+/* ---------- headings: gradient accent word ---------- */
+h1 span{
+  background:linear-gradient(115deg, var(--accent, hsl(199,92%,62%)), var(--accent-b, hsl(174,70%,55%)));
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+
+/* ---------- home: floating chapter cards ---------- */
+.grid{
+  background:transparent !important;
+  border:none !important;
+  gap:14px !important;
+}
+.card{
+  border:1px solid hsla(210, 40%, 72%, 0.10) !important;
+  border-radius:16px;
+  background:linear-gradient(180deg, hsla(215, 28%, 13%, 0.92), hsla(215, 30%, 10%, 0.88)) !important;
+  box-shadow:0 18px 44px -30px hsla(216, 70%, 3%, 0.9);
+  transition:transform .22s cubic-bezier(.4,0,.2,1), box-shadow .22s ease, border-color .22s ease;
+}
+.card:hover{
+  transform:translateY(-3px);
+  border-color:hsla(199, 92%, 62%, 0.38) !important;
+  box-shadow:0 30px 60px -32px hsla(199, 80%, 24%, 0.55);
+}
+
+/* index numerals — italic serif with a cyan→teal gradient */
+.num{
+  font-family:var(--math, 'STIX Two Text', serif) !important;
+  font-style:italic; font-weight:500;
+  font-size:44px !important; line-height:0.9 !important;
+  background:linear-gradient(140deg, var(--accent, hsl(199,92%,62%)), var(--accent-b, hsl(174,70%,55%)));
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent !important;
+  opacity:0.9;
+}
+.card:hover .num{ opacity:1; }
+
+/* ---------- panels ---------- */
+.panel{
+  position:relative; overflow:hidden;
+  border:1px solid hsla(210, 40%, 72%, 0.10) !important;
+  border-radius:16px !important;
+  background:linear-gradient(180deg, hsla(215, 28%, 13%, 0.94), hsla(215, 30%, 10%, 0.9)) !important;
+  box-shadow:0 22px 50px -34px hsla(216, 70%, 3%, 0.9), inset 0 1px 0 hsla(205, 60%, 90%, 0.04);
+  padding:32px !important;
+}
+/* gradient top hairline — a small signature detail */
+.panel::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--accent, hsl(199,92%,62%)), var(--accent-b, hsl(174,70%,55%)), transparent);
+  opacity:0.55;
+}
+.panel-num{
+  font-family:var(--math, 'STIX Two Text', serif) !important;
+  font-style:italic; font-size:17px !important; letter-spacing:0.01em !important;
+  color:var(--accent-b, hsl(174,70%,55%)) !important;
+}
+
+/* ---------- timeline ---------- */
+.timeline{
+  position:relative; overflow:hidden;
+  border:1px solid hsla(210, 40%, 72%, 0.10) !important;
+  border-radius:16px !important;
+  background:linear-gradient(180deg, hsla(215, 28%, 12%, 0.92), hsla(215, 30%, 9%, 0.88)) !important;
+  box-shadow:0 22px 50px -34px hsla(216, 70%, 3%, 0.9);
+}
+.tl-year{
+  font-family:var(--math, 'STIX Two Text', serif) !important;
+  font-style:italic; font-size:16px !important;
+  color:var(--accent, hsl(199,92%,62%)) !important;
+}
+/* node on the connective line (the line is .tl-row::before at left:118px) */
+.tl-row::after{
+  content:''; position:absolute; top:50%; left:118px;
+  width:7px; height:7px; margin:-3.5px 0 0 -3px; border-radius:50%;
+  background:var(--accent, hsl(199,92%,62%));
+  box-shadow:0 0 0 3px hsla(199, 92%, 62%, 0.15);
+}
+
+/* ---------- interactive buttons ---------- */
+.controls button{
+  border-radius:8px !important;
+  transition:all .16s ease !important;
+}
+.controls button:hover{
+  border-color:var(--accent, hsl(199,92%,62%)) !important;
+  color:var(--ink, hsl(210,32%,93%)) !important;
+  box-shadow:0 0 0 3px hsla(199, 92%, 62%, 0.10);
+}
+.controls button.active{
+  box-shadow:0 6px 18px -8px hsla(199, 92%, 62%, 0.6);
+}
+
+/* ---------- sidebar index numerals ---------- */
+.site-serieslink-num{
+  font-family:var(--math, 'STIX Two Text', serif) !important;
+  font-style:italic; font-size:17px !important;
+}
+
+/* keep the decorative background calm when reduced motion is requested
+   (no motion here, but honour the intent by flattening the glow) */
+@media (prefers-reduced-motion: reduce){
+  .card{ transition:none; }
+}

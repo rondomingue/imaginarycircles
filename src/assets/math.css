@@ -1,0 +1,56 @@
+/* ============================================================
+   Shared equation + inline-math typography.
+
+   Injected on every panel by the site-chrome transform, so all
+   five panels get one legible math style instead of the identical
+   `.eq` rule copy-pasted into each file. It loads *after* each
+   page's own <style>, so it refines the per-page `.eq` definition.
+
+   The key change: math is set in STIX Two Text, a serif face
+   designed for scientific and mathematical typesetting. It renders
+   θ, π, √, ∞, ·, and super/subscripts far more clearly than the
+   monospace code font the equations used before.
+   ============================================================ */
+:root{
+  --math: 'STIX Two Text', 'Cambria Math', Georgia, serif;
+}
+
+/* ---------- boxed display equations ---------- */
+.eq{
+  font-family: var(--math) !important;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--accent, hsl(199, 92%, 62%));
+  background: var(--bg, hsl(215, 26%, 7%));
+  border: 1px solid var(--line-soft, hsl(215, 18%, 16%));
+  border-left: 2px solid var(--accent, hsl(199, 92%, 62%));
+  border-radius: 3px;
+  padding: 12px 18px;
+  margin-bottom: 12px;
+  letter-spacing: 0.01em;
+  display: inline-block;
+  /* even, table-aligned figures so numerals line up in an equation */
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Super/subscripts that are actually sized and positioned for reading,
+   and that never stretch the equation's line box. */
+.eq sup,
+.eq sub{
+  font-size: 0.68em;
+  line-height: 0;
+  letter-spacing: 0;
+}
+.eq sup{ vertical-align: 0.62em; }
+.eq sub{ vertical-align: -0.32em; }
+
+/* ---------- inline math inside prose ---------- */
+/* Prose keeps its own display font, but the raised/lowered indices in
+   expressions like e^x or (1+1/n)^n get the same clean sizing so they
+   stop looking like specks. */
+.panel-text sup, .panel-text sub,
+.tl-desc sup,    .tl-desc sub,
+.sub sup,        .sub sub,
+footer sup,      footer sub{
+  font-size: 0.68em;
+}

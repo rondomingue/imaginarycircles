@@ -58,10 +58,12 @@ body > *{ flex-shrink:0; }
 .site-hamburger:hover{ border-color:var(--chrome-accent); background:color-mix(in srgb, var(--chrome-accent) 10%, transparent); }
 .site-hamburger span{ display:block; height:1.5px; width:100%; background:var(--chrome-ink); border-radius:2px; transition:transform 0.2s ease, opacity 0.2s ease; }
 .site-brand{
+  display:inline-flex; align-items:center;
   font-family:var(--chrome-display); font-weight:700; font-size:16px;
   letter-spacing:-0.01em; color:var(--chrome-ink); text-decoration:none;
 }
-.site-brand span{ color:var(--chrome-accent-b); }
+.site-brand-mark{ width:23px; height:23px; margin-right:9px; flex:none; overflow:visible; }
+.site-brand-name b{ color:var(--chrome-accent-b); font-weight:inherit; }
 .site-header-link{
   margin-left:auto; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;
   color:var(--chrome-ink-faint); text-decoration:none; transition:color 0.15s ease;
