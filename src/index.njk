@@ -7,7 +7,7 @@ title: Imaginary Circles
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Imaginary Circles</title>
-<meta name="description" content="An interactive series on radians, waves, e, i, pi, and the road from a rotating point to quantum mechanics.">
+<meta name="description" content="One rotating point, all the way to quantum mechanics. An ongoing interactive series on radians, waves, e, i, pi, spirals, and Fourier — the single idea hiding behind them all.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -42,7 +42,11 @@ title: Imaginary Circles
   @keyframes ic-rings-spin{to{transform:rotate(360deg);}}
   @keyframes ic-ring-pulse{0%,100%{opacity:0.68;} 50%{opacity:1;}}
   @media (prefers-reduced-motion:reduce){ .hero-mark .ic-rings, .hero-mark .ic-r1, .hero-mark .ic-r2, .hero-mark .ic-r3{animation:none;} }
+  .tagline{font-family:var(--display); font-style:italic; font-weight:500; font-size:clamp(19px,2.6vw,24px); color:var(--ink); line-height:1.35; letter-spacing:-0.01em; max-width:640px; margin-bottom:18px;}
   .sub{font-family:var(--display); font-size:16px; color:var(--ink-dim); max-width:660px; line-height:1.6; margin-bottom:56px;}
+  .serieslede{margin-top:26px; font-family:var(--mono); font-size:12.5px; letter-spacing:0.02em; color:var(--ink-faint); display:flex; align-items:center; gap:10px;}
+  .serieslede::before{content:''; width:20px; height:1px; background:var(--accent-b);}
+  .serieslede b{color:var(--ink-dim); font-weight:600;}
 
   .grid{display:grid; grid-template-columns:1fr; gap:1px; background:var(--line-soft); border:1px solid var(--line-soft);}
   .card{
@@ -92,6 +96,7 @@ title: Imaginary Circles
         <circle cx="24" cy="24" r="1.35" fill="var(--ink, #e7edf3)"/>
       </g>
     </svg>Imaginary <span>Circles</span></h1>
+    <p class="tagline">One rotating point, all the way to quantum mechanics.</p>
     <p class="sub">Start with the angle where an arc equals its radius, then follow that one rotating point all the way to quantum mechanics — through waves, Fourier series, <em>e</em>, <em>i</em>, pi, and Feynman's spinning arrows.</p>
 
     <div class="grid">
@@ -105,6 +110,7 @@ title: Imaginary Circles
       </a>
       {% endfor %}
     </div>
+    <p class="serieslede">Seven chapters to begin with — <b>the series is still growing</b>.</p>
   </div>
 </body>
 </html>
