@@ -45,6 +45,9 @@ export default function (eleventyConfig) {
     // 2. head assets — shared chrome + a serif math font (STIX Two Text)
     //    and the equation typography that uses it.
     const head =
+      // Google Analytics — injected on every generated page
+      '<script async src="https://www.googletagmanager.com/gtag/js?id=G-9CMETG9RBQ"></script>\n' +
+      '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag(\'js\',new Date());gtag(\'config\',\'G-9CMETG9RBQ\');</script>\n' +
       '<link rel="stylesheet" href="assets/chrome.css">\n' +
       '<link rel="stylesheet" href="assets/math.css">\n' +
       '<link rel="stylesheet" href="assets/theme.css">\n' +
