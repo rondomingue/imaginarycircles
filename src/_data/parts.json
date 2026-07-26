@@ -28,5 +28,11 @@
     "slug": "feynman-clocks",
     "title": "Feynman's Rotating Clocks",
     "blurb": "Feynman explained quantum electrodynamics with spinning arrows: sum a clock hand for every path, and its length gives the probability."
+  },
+  {
+    "num": "06",
+    "slug": "logarithmic-spiral",
+    "title": "The Logarithmic Spiral",
+    "blurb": "Give e^(iθ) a real exponent and the turning point starts to grow. One constant sets how tightly it winds — the same equiangular curve behind shells, galaxies, and sunflower heads."
   }
 ]

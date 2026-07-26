@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imaginary Circles — 06 The Logarithmic Spiral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: hsl(215, 26%, 7%);
+    --bg-elevated: hsl(215, 24%, 10%);
+    --line: hsl(215, 18%, 22%);
+    --line-soft: hsl(215, 18%, 16%);
+    --ink: hsl(210, 32%, 93%);
+    --ink-dim: hsl(212, 15%, 58%);
+    --ink-faint: hsl(212, 14%, 38%);
+    --accent: hsl(199, 92%, 62%);
+    --accent-b: hsl(174, 70%, 55%);
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink);}
+  body{padding:48px 24px 100px; font-family:var(--mono); -webkit-font-smoothing:antialiased;}
+  .page{max-width:1040px; margin:0 auto;}
+
+  .eyebrow{font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--accent);}
+  h1{font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,50px); letter-spacing:-0.02em; line-height:1.08; margin-bottom:16px;}
+  h1 span{color:var(--accent-b);}
+  .sub{font-family:var(--display); font-size:16px; color:var(--ink-dim); max-width:640px; line-height:1.6; margin-bottom:48px;}
+
+  .seriesnav{max-width:1040px;margin:0 auto 40px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px; padding-bottom:16px; border-bottom:1px solid var(--line-soft);}
+  .seriesnav-label{font-family:var(--display); font-weight:600; font-size:13px; letter-spacing:0.02em; color:var(--ink); white-space:nowrap;}
+  .seriesnav-links{display:flex; flex-wrap:wrap; gap:4px 18px;}
+  .seriesnav-links a{font-family:var(--mono); font-size:12px; color:var(--ink-dim); text-decoration:none; border-bottom:1px solid transparent; padding-bottom:2px; transition:color .15s ease,border-color .15s ease;}
+  .seriesnav-links a:hover{color:var(--ink);}
+  .seriesnav-links a.current{color:var(--accent); border-color:var(--accent);}
+
+  .panel{background:var(--bg-elevated); border:1px solid var(--line-soft); border-radius:2px; padding:28px; margin-bottom:36px; display:grid; grid-template-columns: 1fr 300px; gap:32px;}
+  @media (max-width:820px){ .panel{grid-template-columns:1fr;} }
+  .panel-num{font-size:11px; color:var(--ink-faint); letter-spacing:0.1em; margin-bottom:6px;}
+  .panel-title{font-family:var(--display); font-size:20px; font-weight:600; margin-bottom:14px;}
+  .panel-text{font-family:var(--display); font-size:14px; color:var(--ink-dim); line-height:1.65; margin-bottom:14px;}
+  .panel-text b{color:var(--ink); font-weight:600;}
+  .eq{font-family:var(--mono); font-size:15px; color:var(--accent); background:var(--bg); border:1px solid var(--line-soft); padding:10px 12px; margin-bottom:10px; letter-spacing:0.01em; display:inline-block;}
+  canvas{width:100%; height:auto; display:block; background:var(--bg); border:1px solid var(--line-soft);}
+  .controls{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .controls button{font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; background:var(--bg); color:var(--ink-dim); border:1px solid var(--line); padding:8px 12px; cursor:pointer; transition:all .15s ease;}
+  .controls button:hover{color:var(--ink); border-color:var(--ink-faint);}
+  .controls button.active{color:var(--bg); background:var(--accent); border-color:var(--accent);}
+  .caption{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:10px;}
+  .readout{font-family:var(--mono); font-size:13px; color:var(--accent); margin-top:10px;}
+
+  footer{margin-top:44px; font-family:var(--display); font-size:12.5px; color:var(--ink-faint); line-height:1.75; max-width:660px;}
+  footer b{color:var(--ink-dim);}
+</style>
+</head>
+<body>
+<nav class="seriesnav">
+  <span class="seriesnav-label">Imaginary Circles</span>
+  <div class="seriesnav-links">
+    <a href="radian-circle.html">01 · The Radian Circle</a>
+    <a href="circle-to-wave.html">02 · Circle → Wave → Fourier → Schrödinger</a>
+    <a href="euler-imaginary.html">03 · e, i & Quantum Mechanics</a>
+    <a href="pi-ubiquity.html">04 · The Ubiquity of Pi</a>
+    <a href="feynman-clocks.html">05 · Feynman's Rotating Clocks</a>
+    <a href="logarithmic-spiral.html" class="current">06 · The Logarithmic Spiral</a>
+  </div>
+</nav>
+<div class="page">
+  <header>
+    <div class="eyebrow">growth × rotation</div>
+    <h1>The Logarithmic <span>Spiral</span></h1>
+    <p class="sub">Panel 03 gave us e<sup>iθ</sup>, a point that only ever turns. Add a real number to the exponent and the circle springs a leak: the point keeps turning, but now it grows as it goes. A single constant sets how tightly it winds, and the same equiangular curve turns up in nautilus shells, spiral galaxies, hurricanes, and the seed head of a sunflower.</p>
+  </header>
+
+  <!-- PANEL 1: the spiral -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">01</div>
+      <div class="panel-title">r = e<sup>kθ</sup> — turning and growing at once</div>
+      <canvas id="cSpiral" width="900" height="360"></canvas>
+      <div class="controls" id="spiralControls">
+        <button data-k="0">k = 0 · circle</button>
+        <button data-k="0.1" class="active">k = 0.1</button>
+        <button data-k="0.2">k = 0.2</button>
+        <button data-k="0.3063">golden (φ)</button>
+      </div>
+      <div class="readout" id="spiralReadout"></div>
+    </div>
+    <div>
+      <p class="panel-text">Take the rotating point from panel 03 and let its exponent carry a real part too: <b>z(t) = e<sup>(a+bi)t</sup></b>. The imaginary part <b>b</b> spins it; the real part <b>a</b> scales it. Split into size and direction and the two motions come apart cleanly.</p>
+      <div class="eq">z(t) = e<sup>(a+bi)t</sup> = e<sup>at</sup>·(cos bt + i sin bt)</div>
+      <p class="panel-text">Written in polar form, the radius is just an exponential of the angle. One number <b>k = a/b</b> — the growth per radian — decides everything about the shape. At <b>k = 0</b> the radius never changes and you get a plain circle; nudge it up and each full turn multiplies the radius by the same fixed factor, <b>e<sup>2πk</sup></b>.</p>
+      <div class="eq">r = e<sup>kθ</sup></div>
+    </div>
+  </section>
+
+  <!-- PANEL 2: equiangular -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">02</div>
+      <div class="panel-title">Equiangular: the same angle, everywhere</div>
+      <canvas id="cAngle" width="900" height="360"></canvas>
+      <div class="caption">radius vector (grey) and the curve's tangent (teal) at a moving point — the angle between them never changes</div>
+    </div>
+    <div>
+      <p class="panel-text">Here is the property that makes this spiral special. Draw the straight line from the origin out to any point on the curve, then draw the curve's tangent at that point. The angle between them is <b>the same at every point on the spiral</b>, which is why it's also called the <b>equiangular</b> spiral.</p>
+      <div class="eq">tan φ = 1 / k</div>
+      <p class="panel-text">That constant angle is the whole secret to its self-similarity: <b>zooming in on a logarithmic spiral gives you back the very same spiral</b>, just rotated. Growth and rotation become interchangeable — scaling the picture is identical to turning it. No other spiral does this, and it's exactly the trait a growing shell or galaxy needs: get bigger without changing form.</p>
+    </div>
+  </section>
+
+  <!-- PANEL 3: projection to a growing/decaying wave -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">03</div>
+      <div class="panel-title">Its shadow is a wave that swells or fades</div>
+      <canvas id="cDecomp" width="900" height="320"></canvas>
+      <div class="controls" id="decompControls">
+        <button data-a="-0.16" class="active">a &lt; 0 · damped</button>
+        <button data-a="0">a = 0 · pure wave</button>
+        <button data-a="0.12">a &gt; 0 · growing</button>
+      </div>
+      <div class="readout" id="decompReadout"></div>
+    </div>
+    <div>
+      <p class="panel-text">Unroll the spiral the way panel 02 unrolled the circle — track only the horizontal shadow of the moving point — and the exponential envelope rides straight through into the wave.</p>
+      <div class="eq">Re[ e<sup>(a+bi)t</sup> ] = e<sup>at</sup>·cos(bt)</div>
+      <p class="panel-text">With <b>a &lt; 0</b> the spiral winds inward and the shadow is a <b>ringing that dies away</b> — a plucked string, a struck bell, the current in an RLC circuit. With <b>a = 0</b> it's the steady sine wave of panel 02. With <b>a &gt; 0</b> it runs away: the runaway growth of feedback and resonance. Growth and rotation, read off one axis at a time.</p>
+    </div>
+  </section>
+
+  <!-- PANEL 4: nature -->
+  <section class="panel">
+    <div>
+      <div class="panel-num">04</div>
+      <div class="panel-title">Why nature keeps reaching for it</div>
+      <canvas id="cPhyllo" width="900" height="440"></canvas>
+      <div class="controls" id="phylloControls">
+        <button data-deg="137.507" class="active">137.5° · golden angle</button>
+        <button data-deg="137.1">137.1°</button>
+        <button data-deg="138">138°</button>
+        <button data-deg="90">90°</button>
+      </div>
+      <div class="readout" id="phylloReadout"></div>
+    </div>
+    <div>
+      <p class="panel-text">A sunflower drops each new seed at a fixed turn from the last one, and pushes the earlier seeds outward as it grows — a rotation plus steady expansion, the exact recipe for a logarithmic spiral. The only question is the turn angle.</p>
+      <p class="panel-text">Pick almost any angle and the seeds line up in wasteful radial spokes. Pick the <b>golden angle</b>, ≈137.5° — the most irrational turn there is, built from φ and cousin to the π of panel 04 — and no two seeds ever fall on the same ray. The packing is as dense as it can be, and the curved <b>parastichy</b> spirals you see are always consecutive Fibonacci numbers. Try nudging the angle by a fraction of a degree and watch the order collapse.</p>
+    </div>
+  </section>
+
+  <footer>
+    <b>The thread so far:</b> a radian became a rotating point (01), the point's shadow became every wave (02), a real exponent turned pure rotation into growth (03), that constant showed up everywhere (04), and summed rotating arrows became quantum probability (05). Add one real number to the exponent and the same point stops circling and starts spiraling — the curve a shell, a galaxy, and a flower head all settle into, because it is the one shape that can grow without ever changing its form.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const COL = {
+    line: 'rgba(140,160,185,0.18)',
+    lineSoft: 'rgba(140,160,185,0.09)',
+    dim: 'rgba(140,160,185,0.55)',
+    ink: 'rgba(226,234,243,0.95)',
+    accent: 'rgba(90,196,255,1)',
+    accentB: 'rgba(70,210,190,1)',
+    accentSoft: 'rgba(90,196,255,0.22)'
+  };
+  function ctxOf(id){ const cv=document.getElementById(id); return {cv, ctx:cv.getContext('2d'), w:cv.width, h:cv.height}; }
+  function clear(P){ P.ctx.clearRect(0,0,P.w,P.h); }
+  function dot(ctx,x,y,r,color){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); }
+  function axes(ctx,cx,cy,r){
+    ctx.strokeStyle=COL.lineSoft; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(cx-r,cy); ctx.lineTo(cx+r,cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,cy-r); ctx.lineTo(cx,cy+r); ctx.stroke();
+  }
+  function lerpColor(t){ // accent -> accentB
+    const a=[90,196,255], b=[70,210,190];
+    const c=a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+    return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
+  }
+
+  // ---------- Panel 1: the spiral r = e^{kθ} ----------
+  const P1 = ctxOf('cSpiral');
+  let k1 = 0.1;
+  function drawSpiral(t){
+    clear(P1); const c=P1.ctx, cx=P1.w/2, cy=P1.h/2;
+    const R = Math.min(cx,cy)-22;
+    axes(c,cx,cy,R);
+    const thMin=-2.2*2*Math.PI, thMax=3.4*2*Math.PI;
+    const scale = R / Math.exp(k1*thMax);
+    // full faint spiral
+    c.strokeStyle=COL.accentSoft; c.lineWidth=1.3; c.beginPath();
+    let started=false;
+    for(let th=thMin; th<=thMax; th+=0.04){
+      const r=scale*Math.exp(k1*th); if(r<0.3) continue;
+      const x=cx+r*Math.cos(th), y=cy-r*Math.sin(th);
+      if(!started){c.moveTo(x,y);started=true;} else c.lineTo(x,y);
+    }
+    c.stroke();
+    // sweeping angle
+    const period=7, frac=(t%period)/period;
+    const thNow = thMin + frac*(thMax-thMin);
+    // bright trace up to thNow
+    c.strokeStyle=COL.accent; c.lineWidth=2; c.beginPath(); started=false;
+    for(let th=thMin; th<=thNow; th+=0.04){
+      const r=scale*Math.exp(k1*th); if(r<0.3) continue;
+      const x=cx+r*Math.cos(th), y=cy-r*Math.sin(th);
+      if(!started){c.moveTo(x,y);started=true;} else c.lineTo(x,y);
+    }
+    c.stroke();
+    const rNow=scale*Math.exp(k1*thNow);
+    const px=cx+rNow*Math.cos(thNow), py=cy-rNow*Math.sin(thNow);
+    c.strokeStyle=COL.dim; c.lineWidth=1; c.beginPath(); c.moveTo(cx,cy); c.lineTo(px,py); c.stroke();
+    dot(c,px,py,4.5,COL.accentB);
+    const perTurn=Math.exp(k1*2*Math.PI);
+    document.getElementById('spiralReadout').textContent =
+      'k = '+k1.toFixed(3)+'   ·   every full turn multiplies the radius by '+perTurn.toFixed(2)+'×';
+  }
+  document.getElementById('spiralControls').addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('#spiralControls button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); k1=parseFloat(b.dataset.k);
+  });
+
+  // ---------- Panel 2: equiangular ----------
+  const P2 = ctxOf('cAngle');
+  const k2 = 0.2;
+  function drawAngle(t){
+    clear(P2); const c=P2.ctx, cx=P2.w/2, cy=P2.h/2;
+    const R=Math.min(cx,cy)-22;
+    const thMin=-1.6*2*Math.PI, thMax=2.6*2*Math.PI;
+    const scale=R/Math.exp(k2*thMax);
+    // faint radial guide lines
+    c.strokeStyle=COL.lineSoft; c.lineWidth=1;
+    for(let i=0;i<8;i++){ const a=i*Math.PI/4; c.beginPath(); c.moveTo(cx,cy); c.lineTo(cx+R*Math.cos(a),cy-R*Math.sin(a)); c.stroke(); }
+    // spiral
+    c.strokeStyle=COL.accent; c.lineWidth=2; c.beginPath(); let started=false;
+    for(let th=thMin; th<=thMax; th+=0.04){
+      const r=scale*Math.exp(k2*th); if(r<0.3) continue;
+      const x=cx+r*Math.cos(th), y=cy-r*Math.sin(th);
+      if(!started){c.moveTo(x,y);started=true;} else c.lineTo(x,y);
+    }
+    c.stroke();
+    // moving point
+    const period=9, frac=(t%period)/period;
+    const th = (thMin+2*Math.PI) + frac*(thMax-(thMin+2*Math.PI));
+    const r=scale*Math.exp(k2*th);
+    const px=cx+r*Math.cos(th), py=cy-r*Math.sin(th);
+    // radius vector
+    c.strokeStyle=COL.dim; c.lineWidth=1.4; c.beginPath(); c.moveTo(cx,cy); c.lineTo(px,py); c.stroke();
+    // tangent direction: d/dθ of (r cosθ, r sinθ), r'=k r
+    let vx = k2*Math.cos(th)-Math.sin(th);
+    let vy = k2*Math.sin(th)+Math.cos(th);
+    const vlen=Math.hypot(vx,vy); vx/=vlen; vy/=vlen;
+    const L=46;
+    c.strokeStyle=COL.accentB; c.lineWidth=2;
+    c.beginPath(); c.moveTo(px - vx*L, py + vy*L); c.lineTo(px + vx*L, py - vy*L); c.stroke();
+    // angle arc between radius(outward) and tangent, drawn at the point
+    const aRad = Math.atan2(-(Math.sin(th)), Math.cos(th));   // radius dir in screen coords
+    const aTan = Math.atan2(-vy, vx);                          // tangent dir in screen coords
+    c.strokeStyle=COL.ink; c.lineWidth=1.2;
+    c.beginPath(); c.arc(px,py,15, Math.min(aRad,aTan), Math.max(aRad,aTan)); c.stroke();
+    dot(c,px,py,4,COL.accent);
+    const phi = Math.atan2(1,k2)*180/Math.PI;
+    document.getElementById('angleReadout') && (document.getElementById('angleReadout').textContent='');
+  }
+
+  // ---------- Panel 3: projection to a growing/decaying wave ----------
+  const P3 = ctxOf('cDecomp');
+  let a3 = -0.16;
+  function drawDecomp(t){
+    clear(P3); const c=P3.ctx, w=P3.w, h=P3.h, cy=h/2;
+    const Lx = h*0.5;                 // spiral centre x
+    const R = h*0.5-24;               // spiral radius budget
+    const wx0 = h+24, wx1 = w-14;     // wave plot band
+    const thMin=-3*Math.PI, thMax=3*Math.PI;
+    // radius normalisation so the biggest radius over the range fits R
+    let rmax=0; for(let th=thMin; th<=thMax; th+=0.2){ rmax=Math.max(rmax,Math.exp(a3*th)); }
+    const sc = R/rmax;
+    // spiral (faint) + envelope reference circle
+    c.strokeStyle=COL.accentSoft; c.lineWidth=1.3; c.beginPath(); let st=false;
+    for(let th=thMin; th<=thMax; th+=0.04){
+      const r=sc*Math.exp(a3*th); const x=Lx+r*Math.cos(th), y=cy-r*Math.sin(th);
+      if(!st){c.moveTo(x,y);st=true;} else c.lineTo(x,y);
+    }
+    c.stroke();
+    axes(c,Lx,cy,R);
+    // wave axis
+    c.strokeStyle=COL.lineSoft; c.lineWidth=1; c.beginPath(); c.moveTo(wx0,cy); c.lineTo(wx1,cy); c.stroke();
+    // envelope ±e^{aθ} over the band
+    c.strokeStyle=COL.dim; c.setLineDash([3,4]); c.lineWidth=1;
+    for(const s of [1,-1]){
+      c.beginPath(); let f=false;
+      for(let th=thMin; th<=thMax; th+=0.05){
+        const env=sc*Math.exp(a3*th);
+        const x=wx0+(th-thMin)/(thMax-thMin)*(wx1-wx0);
+        const y=cy - s*env;
+        if(!f){c.moveTo(x,y);f=true;} else c.lineTo(x,y);
+      }
+      c.stroke();
+    }
+    c.setLineDash([]);
+    // the wave e^{aθ} cos θ
+    c.strokeStyle=COL.accent; c.lineWidth=2; c.beginPath(); let fw=false;
+    for(let th=thMin; th<=thMax; th+=0.03){
+      const val=sc*Math.exp(a3*th)*Math.cos(th);
+      const x=wx0+(th-thMin)/(thMax-thMin)*(wx1-wx0);
+      const y=cy - val;
+      if(!fw){c.moveTo(x,y);fw=true;} else c.lineTo(x,y);
+    }
+    c.stroke();
+    // moving marker
+    const period=8, frac=(t%period)/period;
+    const th=thMin+frac*(thMax-thMin);
+    const r=sc*Math.exp(a3*th);
+    const spx=Lx+r*Math.cos(th), spy=cy-r*Math.sin(th);
+    const val=r*Math.cos(th);
+    const wpx=wx0+frac*(wx1-wx0), wpy=cy-val;
+    c.strokeStyle=COL.dim; c.lineWidth=1; c.beginPath(); c.moveTo(Lx,cy); c.lineTo(spx,spy); c.stroke();
+    c.strokeStyle=COL.lineSoft; c.beginPath(); c.moveTo(spx,spy); c.lineTo(wpx,spy); c.stroke();
+    dot(c,spx,spy,4,COL.accentB); dot(c,wpx,wpy,4,COL.accent);
+    const label = a3<0? 'ringing that fades out' : (a3>0? 'oscillation that runs away' : 'a steady, unchanging wave');
+    document.getElementById('decompReadout').textContent = 'a = '+a3.toFixed(2)+'   ·   '+label;
+  }
+  document.getElementById('decompControls').addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('#decompControls button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); a3=parseFloat(b.dataset.a);
+  });
+
+  // ---------- Panel 4: phyllotaxis ----------
+  const P4 = ctxOf('cPhyllo');
+  let deg4 = 137.507;
+  const N4 = 620;
+  function drawPhyllo(t){
+    clear(P4); const c=P4.ctx, cx=P4.w/2, cy=P4.h/2;
+    const cscale=(Math.min(cx,cy)-14)/Math.sqrt(N4);
+    const ga=deg4*Math.PI/180;
+    const reveal=Math.min(N4, Math.floor(t*120));
+    for(let n=0;n<reveal;n++){
+      const ang=n*ga, r=cscale*Math.sqrt(n);
+      const x=cx+r*Math.cos(ang), y=cy-r*Math.sin(ang);
+      dot(c,x,y,2.7,lerpColor(n/N4));
+    }
+    const nice = Math.abs(deg4-137.507)<0.01 ? 'golden angle — densest packing, Fibonacci spirals'
+              : 'off the golden angle — seeds fall into radial spokes';
+    document.getElementById('phylloReadout').textContent = 'divergence '+deg4.toFixed(3)+'°   ·   '+nice;
+  }
+  document.getElementById('phylloControls').addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('#phylloControls button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); deg4=parseFloat(b.dataset.deg);
+  });
+
+  function loop(now){
+    const t=now/1000;
+    drawSpiral(t); drawAngle(t); drawDecomp(t); drawPhyllo(t);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
