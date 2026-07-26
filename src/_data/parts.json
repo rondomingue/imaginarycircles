@@ -34,5 +34,11 @@
     "slug": "logarithmic-spiral",
     "title": "The Logarithmic Spiral",
     "blurb": "Give e^(iθ) a real exponent and the turning point starts to grow. One constant sets how tightly it winds — the same equiangular curve behind shells, galaxies, and sunflower heads."
+  },
+  {
+    "num": "07",
+    "slug": "epicycles",
+    "title": "Epicycles",
+    "blurb": "Chain enough rotating circles, each spinning at its own steady rate, and their tip traces any shape at all — a square wave, a star, a signature. Fourier, drawn."
   }
 ]
