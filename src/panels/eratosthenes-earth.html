@@ -59,14 +59,31 @@
     aspect-ratio:900 / 420;
     min-height:280px;
     overflow:hidden;
-    background:var(--bg);
+    background:
+      radial-gradient(circle at 56% 42%, hsla(199, 92%, 62%, 0.13), transparent 34%),
+      linear-gradient(180deg, hsla(215, 30%, 13%, 0.95), hsla(215, 34%, 7%, 0.98));
     border:1px solid var(--line-soft);
+  }
+  .map-wrap::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    z-index:3;
+    pointer-events:none;
+    background:
+      linear-gradient(90deg, hsla(215, 30%, 7%, 0.34), transparent 24%, transparent 74%, hsla(215, 30%, 7%, 0.30)),
+      linear-gradient(180deg, hsla(215, 30%, 7%, 0.16), transparent 38%, hsla(215, 30%, 7%, 0.42)),
+      radial-gradient(circle at 52% 48%, transparent 0 38%, hsla(215, 35%, 5%, 0.32) 72%);
+    mix-blend-mode:multiply;
   }
   .map-wrap canvas{border:0;}
   #earthGlobe{
     position:absolute;
     inset:0;
     z-index:2;
+  }
+  #earthGlobe .maplibregl-canvas{
+    filter:saturate(0.24) sepia(0.18) hue-rotate(152deg) brightness(0.58) contrast(0.92);
   }
   .map-fallback{
     position:absolute;
@@ -86,10 +103,17 @@
     padding:5px 7px;
     box-shadow:0 8px 20px hsla(215, 40%, 3%, 0.35);
     white-space:nowrap;
+    position:relative;
+    z-index:4;
   }
   .maplibregl-ctrl-attrib{
     font-family:var(--mono);
     font-size:10px;
+    background:hsla(215, 26%, 7%, 0.76) !important;
+    color:var(--ink-faint);
+  }
+  .maplibregl-ctrl-attrib a{
+    color:var(--ink-dim);
   }
   footer{margin-top:44px; font-family:var(--display); font-size:12.5px; color:var(--ink-faint); line-height:1.75; max-width:700px;}
   footer b{color:var(--ink-dim);}
@@ -359,7 +383,18 @@
           }
         },
         layers: [
-          { id: 'osm', type: 'raster', source: 'osm' }
+          {
+            id: 'osm',
+            type: 'raster',
+            source: 'osm',
+            paint: {
+              'raster-opacity': 0.82,
+              'raster-saturation': -0.78,
+              'raster-contrast': 0.12,
+              'raster-brightness-min': 0.05,
+              'raster-brightness-max': 0.48
+            }
+          }
         ]
       },
       center: [31.35, 27.75],
@@ -396,7 +431,7 @@
         type: 'line',
         source: 'city-arc',
         paint: {
-          'line-color': '#5ac4ff',
+          'line-color': '#4fc7e6',
           'line-width': 3,
           'line-dasharray': [2, 1.5]
         }
@@ -417,8 +452,8 @@
         source: 'city-points',
         paint: {
           'circle-radius': 6,
-          'circle-color': '#46d2be',
-          'circle-stroke-color': '#e7edf3',
+          'circle-color': '#d7bc72',
+          'circle-stroke-color': '#f0eadb',
           'circle-stroke-width': 1.5
         }
       });
