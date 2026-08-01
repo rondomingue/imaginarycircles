@@ -66,6 +66,15 @@ export default function (eleventyConfig) {
     // 4. footer before </body>
     html = html.replace(/<\/body>/i, `${partial("footer")}\n</body>`);
 
+    // 5. lesson-page accent strip
+    const outputPath = out.replaceAll("\\", "/");
+    if (!outputPath.endsWith("_site/index.html")) {
+      html = html.replace(
+        /(<div class="page">)/i,
+        `$1\n  <div class="page-accent-strip" aria-hidden="true"><img src="assets/math-hand-strip-dense.png" alt=""></div>`
+      );
+    }
+
     return html;
   });
 
