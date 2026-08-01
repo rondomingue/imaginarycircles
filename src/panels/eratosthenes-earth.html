@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imaginary Circles — 08 Eratosthenes and the First Cosmic Ruler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: hsl(215, 26%, 7%);
+    --bg-elevated: hsl(215, 24%, 10%);
+    --line: hsl(215, 18%, 22%);
+    --line-soft: hsl(215, 18%, 16%);
+    --ink: hsl(210, 32%, 93%);
+    --ink-dim: hsl(212, 15%, 58%);
+    --ink-faint: hsl(212, 14%, 38%);
+    --accent: hsl(199, 92%, 62%);
+    --accent-b: hsl(174, 70%, 55%);
+    --warm: hsl(43, 84%, 66%);
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--ink);}
+  body{padding:48px 24px 100px; font-family:var(--mono); -webkit-font-smoothing:antialiased;}
+  .page{max-width:1040px; margin:0 auto;}
+
+  .eyebrow{font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--accent);}
+  h1{font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,52px); letter-spacing:-0.02em; line-height:1.06; margin-bottom:16px;}
+  h1 span{color:var(--accent-b);}
+  .sub{font-family:var(--display); font-size:16px; color:var(--ink-dim); max-width:680px; line-height:1.6; margin-bottom:48px;}
+
+  .panel{
+    background:var(--bg-elevated); border:1px solid var(--line-soft); border-radius:2px;
+    padding:28px; margin-bottom:36px; display:grid; grid-template-columns:1fr 310px; gap:32px;
+  }
+  @media (max-width:820px){ .panel{grid-template-columns:1fr;} }
+  .panel-num{font-size:11px; color:var(--ink-faint); letter-spacing:0.1em; margin-bottom:6px;}
+  .panel-title{font-family:var(--display); font-size:20px; font-weight:600; margin-bottom:14px;}
+  .panel-text{font-family:var(--display); font-size:14px; color:var(--ink-dim); line-height:1.65; margin-bottom:14px;}
+  .panel-text b{color:var(--ink); font-weight:600;}
+  .eq{font-family:var(--mono); font-size:15px; color:var(--accent); background:var(--bg); border:1px solid var(--line-soft); padding:10px 12px; margin-bottom:10px; letter-spacing:0.01em; display:inline-block;}
+  .eq sup{font-size:0.7em;}
+  canvas{width:100%; height:auto; display:block; background:var(--bg); border:1px solid var(--line-soft);}
+  .caption{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:10px; line-height:1.5;}
+  .controls{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .controls button{font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; background:var(--bg); color:var(--ink-dim); border:1px solid var(--line); padding:8px 12px; cursor:pointer; transition:all .15s ease;}
+  .controls button:hover{color:var(--ink); border-color:var(--ink-faint);}
+  .controls button.active{color:var(--bg); background:var(--accent); border-color:var(--accent);}
+  .readout{font-family:var(--mono); font-size:13px; color:var(--accent); margin-top:10px; line-height:1.55;}
+  .note-list{display:grid; gap:10px; margin-top:8px;}
+  .note-list p{border-left:1px solid var(--line); padding-left:12px;}
+  .map-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:900 / 420;
+    min-height:280px;
+    overflow:hidden;
+    background:var(--bg);
+    border:1px solid var(--line-soft);
+  }
+  .map-wrap canvas{border:0;}
+  #earthGlobe{
+    position:absolute;
+    inset:0;
+    z-index:2;
+  }
+  .map-fallback{
+    position:absolute;
+    inset:0;
+    z-index:1;
+  }
+  .map-wrap.is-live .map-fallback{display:none;}
+  .map-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink);
+    background:hsla(215, 26%, 7%, 0.82);
+    border:1px solid hsla(199, 92%, 62%, 0.35);
+    border-radius:6px;
+    padding:5px 7px;
+    box-shadow:0 8px 20px hsla(215, 40%, 3%, 0.35);
+    white-space:nowrap;
+  }
+  .maplibregl-ctrl-attrib{
+    font-family:var(--mono);
+    font-size:10px;
+  }
+  footer{margin-top:44px; font-family:var(--display); font-size:12.5px; color:var(--ink-faint); line-height:1.75; max-width:700px;}
+  footer b{color:var(--ink-dim);}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="eyebrow">shadow × arc × Earth</div>
+    <h1>Eratosthenes and the<br><span>First Cosmic Ruler</span></h1>
+    <p class="sub">Before telescopes, before satellites, a noon shadow turned the Earth into a circle problem. Measure one angle, know one arc length, and the size of the world falls out of the geometry.</p>
+  </header>
+
+  <section class="panel">
+    <div>
+      <div class="panel-num">01</div>
+      <div class="panel-title">Two cities under the same Sun</div>
+      <canvas id="shadowCanvas" width="900" height="360"></canvas>
+      <div class="controls" id="angleControls">
+        <button data-angle="5">5°</button>
+        <button data-angle="7.2" class="active">7.2°</button>
+        <button data-angle="10">10°</button>
+        <button data-angle="14.4">14.4°</button>
+      </div>
+      <div class="caption">At Syene the noon Sun was nearly overhead; at Alexandria a vertical stick cast a measurable shadow.</div>
+    </div>
+    <div>
+      <p class="panel-text">The story begins with a mismatch. At midsummer noon, sunlight was said to fall straight down a deep well at <b>Syene</b>. Farther north in <b>Alexandria</b>, the same sunlight made a vertical stick cast a shadow.</p>
+      <p class="panel-text">Because the Sun is so far away, its rays arrive almost parallel. That means the shadow angle at Alexandria is the same as the <b>central angle</b> between the two cities on Earth.</p>
+      <div class="eq">shadow angle = Earth-center angle</div>
+      <p class="panel-text">A local shadow becomes a global arc. That is the leap.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div>
+      <div class="panel-num">02</div>
+      <div class="panel-title">The shadow angle is a fraction of the full circle</div>
+      <canvas id="arcCanvas" width="900" height="360"></canvas>
+      <div class="readout" id="arcReadout"></div>
+    </div>
+    <div>
+      <p class="panel-text">Eratosthenes measured the Alexandria shadow at about <b>7.2°</b>. That number matters because 7.2° is exactly one fiftieth of a full turn.</p>
+      <div class="eq">7.2° / 360° = 1 / 50</div>
+      <p class="panel-text">So if the Alexandria-to-Syene distance is one arc on Earth's surface, then Earth's whole circumference is fifty of those arcs.</p>
+      <div class="eq">circumference = distance × 360 / angle</div>
+      <p class="panel-text">Using the traditional distance of <b>5,000 stadia</b>, the estimate becomes <b>250,000 stadia</b> around the Earth.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div>
+      <div class="panel-num">03</div>
+      <div class="panel-title">A map is a circle seen from above</div>
+      <div class="map-wrap" id="mapWrap">
+        <div id="earthGlobe" aria-label="MapLibre globe using OpenStreetMap tiles, centered on Egypt"></div>
+        <canvas class="map-fallback" id="mapCanvas" width="900" height="420"></canvas>
+      </div>
+      <div class="caption">OpenStreetMap tiles on a MapLibre globe: Alexandria and Syene/Aswan sit almost on the same meridian, so the north-south distance can stand in for the arc.</div>
+    </div>
+    <div>
+      <p class="panel-text">The geometry works because the two cities are treated as lying nearly north-south. On a map, the distance looks like a straight segment. On the Earth, it is an <b>arc</b> of a huge circle.</p>
+      <p class="panel-text">That is the same idea as radians from the first chapter: an angle at the center cuts off an arc at the edge.</p>
+      <div class="eq">arc length = radius × angle</div>
+      <p class="panel-text">If you know the arc length and the angle, you can solve backward for the radius. Suddenly the radius of Earth is not mythic; it is a number.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div>
+      <div class="panel-num">04</div>
+      <div class="panel-title">The same arc logic scales the heavens</div>
+      <canvas id="ladderCanvas" width="900" height="360"></canvas>
+      <div class="caption">Once Earth has a size, later astronomers can use angle plus baseline again: parallax turns tiny arcs in the sky into distances.</div>
+    </div>
+    <div>
+      <p class="panel-text">Eratosthenes did not measure the whole universe. But he gave astronomy its first solid ruler: <b>Earth itself</b>. Once Earth had a scale, eclipses, lunar distance estimates, planetary models, and eventually stellar parallax had something to stand on.</p>
+      <p class="panel-text">The pattern keeps repeating: choose a baseline, measure a small angle, and let circular geometry turn that angle into distance.</p>
+      <div class="eq">distance ≈ baseline / angle</div>
+      <p class="panel-text">The universe got bigger because our arcs got smaller and our baselines got better.</p>
+    </div>
+  </section>
+
+  <footer>
+    <b>The throughline:</b> the same angle-and-arc relationship behind radians becomes a method for measuring Earth. Eratosthenes used a shadow to find a central angle, paired it with a known surface distance, and turned a local observation into the first mathematical scale for the world.
+  </footer>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+<script>
+(function(){
+  const COL = {
+    line:'rgba(140,160,185,0.20)',
+    lineSoft:'rgba(140,160,185,0.10)',
+    dim:'rgba(150,168,190,0.58)',
+    ink:'rgba(226,234,243,0.95)',
+    accent:'rgba(90,196,255,1)',
+    accentB:'rgba(70,210,190,1)',
+    warm:'rgba(244,190,91,1)',
+    warmSoft:'rgba(244,190,91,0.18)'
+  };
+  const state = { angle: 7.2, distance: 5000 };
+
+  function setup(id){
+    const cv = document.getElementById(id);
+    return { cv, ctx:cv.getContext('2d'), w:cv.width, h:cv.height };
+  }
+  const Pshadow = setup('shadowCanvas');
+  const Parc = setup('arcCanvas');
+  const Pmap = setup('mapCanvas');
+  const Pladder = setup('ladderCanvas');
+  let mapStarted = false;
+
+  function clear(P){ P.ctx.clearRect(0,0,P.w,P.h); }
+  function line(ctx,x1,y1,x2,y2,color=COL.dim,w=1,dash=[]){
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=w; ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore();
+  }
+  function circle(ctx,x,y,r,color=COL.line,w=1,fill=null){
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    if(fill){ ctx.fillStyle=fill; ctx.fill(); }
+    ctx.strokeStyle=color; ctx.lineWidth=w; ctx.stroke();
+  }
+  function label(ctx,text,x,y,color=COL.dim,size=14,align='center'){
+    ctx.fillStyle=color; ctx.font=size+'px ui-monospace, SFMono-Regular, Menlo, monospace'; ctx.textAlign=align; ctx.fillText(text,x,y);
+  }
+  function arrow(ctx,x1,y1,x2,y2,color=COL.accent,w=1.5){
+    line(ctx,x1,y1,x2,y2,color,w);
+    const a=Math.atan2(y2-y1,x2-x1), l=10;
+    ctx.beginPath(); ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-l*Math.cos(a-0.55), y2-l*Math.sin(a-0.55));
+    ctx.lineTo(x2-l*Math.cos(a+0.55), y2-l*Math.sin(a+0.55));
+    ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+  }
+  function angleArc(ctx,cx,cy,r,a1,a2,color=COL.warm,w=3){
+    ctx.beginPath(); ctx.arc(cx,cy,r,a1,a2); ctx.strokeStyle=color; ctx.lineWidth=w; ctx.stroke();
+  }
+
+  function drawShadow(){
+    clear(Pshadow); const c=Pshadow.ctx;
+    const earthX=265, earthY=196, R=122;
+    circle(c,earthX,earthY,R,COL.line,1.2,'rgba(90,196,255,0.04)');
+    for(let i=0;i<6;i++) line(c,80+i*34,44,228+i*34,174,COL.warm,1.2);
+    label(c,'parallel sunlight',128,38,COL.warm,13,'left');
+
+    const syeneA=-Math.PI/2;
+    const alexA=syeneA - state.angle*Math.PI/180;
+    const sy={x:earthX+R*Math.cos(syeneA), y:earthY+R*Math.sin(syeneA)};
+    const al={x:earthX+R*Math.cos(alexA), y:earthY+R*Math.sin(alexA)};
+    line(c,earthX,earthY,sy.x,sy.y,COL.dim,1.2);
+    line(c,earthX,earthY,al.x,al.y,COL.dim,1.2);
+    angleArc(c,earthX,earthY,46,alexA,syeneA,COL.warm,3);
+    label(c,state.angle.toFixed(1)+'°',earthX-22,earthY-52,COL.warm,14);
+    circle(c,sy.x,sy.y,5,COL.accentB,1,'rgba(70,210,190,0.9)');
+    circle(c,al.x,al.y,5,COL.accent,1,'rgba(90,196,255,0.9)');
+    label(c,'SYENE',sy.x+18,sy.y-3,COL.accentB,12,'left');
+    label(c,'ALEXANDRIA',al.x-16,al.y-12,COL.accent,12,'right');
+
+    const stickX=610, groundY=256, stick=112;
+    line(c,stickX-95,groundY,stickX+165,groundY,COL.line,1);
+    line(c,stickX,groundY,stickX,groundY-stick,COL.ink,3);
+    const shadowLen=Math.tan(state.angle*Math.PI/180)*stick;
+    line(c,stickX,groundY,stickX+shadowLen,groundY,COL.warm,4);
+    line(c,stickX,groundY-stick,stickX+shadowLen,groundY,COL.warm,1.4,[5,5]);
+    angleArc(c,stickX,groundY-stick,40,Math.PI/2-state.angle*Math.PI/180,Math.PI/2,COL.warm,2);
+    label(c,'shadow angle',stickX+72,groundY-stick+45,COL.warm,13,'left');
+    label(c,'gnomon',stickX-10,groundY-stick-12,COL.ink,12,'right');
+  }
+
+  function drawArc(){
+    clear(Parc); const c=Parc.ctx;
+    const cx=246, cy=190, R=130, a1=-Math.PI/2-state.angle*Math.PI/180, a2=-Math.PI/2;
+    circle(c,cx,cy,R,COL.line,1.2,'rgba(90,196,255,0.04)');
+    angleArc(c,cx,cy,R,a1,a2,COL.accent,5);
+    line(c,cx,cy,cx+R*Math.cos(a1),cy+R*Math.sin(a1),COL.dim,1);
+    line(c,cx,cy,cx+R*Math.cos(a2),cy+R*Math.sin(a2),COL.dim,1);
+    angleArc(c,cx,cy,46,a1,a2,COL.warm,3);
+    label(c,state.distance.toLocaleString()+' stadia',cx-94,cy-132,COL.accent,13,'left');
+    label(c,state.angle.toFixed(1)+'°',cx-18,cy-52,COL.warm,14);
+
+    const fraction=state.angle/360;
+    const circumference=state.distance/fraction;
+    const radius=circumference/(2*Math.PI);
+    label(c,'angle / full turn',530,116,COL.dim,13,'left');
+    label(c,state.angle.toFixed(1)+' / 360 = 1 / '+Math.round(360/state.angle),530,146,COL.ink,20,'left');
+    label(c,'circumference',530,202,COL.dim,13,'left');
+    label(c,state.distance.toLocaleString()+' × '+Math.round(360/state.angle)+' = '+Math.round(circumference).toLocaleString()+' stadia',530,232,COL.accent,18,'left');
+    label(c,'radius ≈ '+Math.round(radius).toLocaleString()+' stadia',530,274,COL.accentB,16,'left');
+    document.getElementById('arcReadout').textContent =
+      'At '+state.angle.toFixed(1)+'°, the city arc is 1/'+Math.round(360/state.angle)+' of Earth.';
+  }
+
+  function drawMap(){
+    clear(Pmap); const c=Pmap.ctx;
+    c.strokeStyle=COL.lineSoft; c.lineWidth=1;
+    for(let x=60;x<Pmap.w;x+=58){ line(c,x,42,x,372,COL.lineSoft); }
+    for(let y=50;y<Pmap.h;y+=42){ line(c,44,y,846,y,COL.lineSoft); }
+    c.fillStyle='rgba(90,196,255,0.08)';
+    c.beginPath(); c.ellipse(452,154,285,46,-0.08,0,Math.PI*2); c.fill(); c.strokeStyle=COL.line; c.stroke();
+    c.fillStyle='rgba(70,210,190,0.07)';
+    c.beginPath();
+    c.moveTo(380,206); c.bezierCurveTo(435,196,504,202,540,236); c.bezierCurveTo(568,265,555,314,504,345);
+    c.bezierCurveTo(456,374,408,345,392,300); c.bezierCurveTo(378,260,344,244,380,206); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(610,176); c.bezierCurveTo(682,202,732,240,778,302); c.lineTo(720,336); c.bezierCurveTo(674,280,612,236,560,220); c.closePath(); c.fill(); c.stroke();
+    const alex={x:438,y:205}, syene={x:454,y:310};
+    line(c,alex.x,alex.y,syene.x,syene.y,COL.accent,2,[5,5]);
+    circle(c,alex.x,alex.y,6,COL.accent,1,'rgba(90,196,255,0.9)');
+    circle(c,syene.x,syene.y,6,COL.accentB,1,'rgba(70,210,190,0.9)');
+    label(c,'ALEXANDRIA',alex.x-12,alex.y-12,COL.accent,12,'right');
+    label(c,'SYENE',syene.x+14,syene.y+4,COL.accentB,12,'left');
+    label(c,'MEDITERRANEAN',466,150,COL.dim,13);
+    label(c,'NILE',410,282,COL.dim,12);
+    arrow(c,188,310,188,204,COL.warm,1.4);
+    label(c,'NORTH-SOUTH ARC',188,336,COL.warm,12);
+    label(c,'map segment',120,82,COL.dim,13,'left');
+    label(c,'surface arc',120,108,COL.accent,18,'left');
+    label(c,'central angle',120,136,COL.warm,18,'left');
+  }
+
+  function drawLadder(){
+    clear(Pladder); const c=Pladder.ctx;
+    const baseY=278;
+    circle(c,168,baseY,36,COL.accent,1.3,'rgba(90,196,255,0.06)');
+    label(c,'EARTH',168,baseY+65,COL.accent,12);
+    line(c,168,baseY,334,118,COL.dim,1);
+    line(c,168,baseY,334,204,COL.dim,1);
+    angleArc(c,168,baseY,54,-0.77,-0.39,COL.warm,2.5);
+    label(c,'angle',216,baseY-42,COL.warm,12);
+    circle(c,334,118,10,COL.accentB,1,'rgba(70,210,190,0.8)');
+    circle(c,334,204,8,COL.accentB,1,'rgba(70,210,190,0.5)');
+    label(c,'MOON / PLANET',334,92,COL.accentB,12);
+
+    line(c,452,baseY,574,baseY,COL.warm,4);
+    label(c,'BASELINE',513,baseY+26,COL.warm,12);
+    line(c,452,baseY,720,104,COL.dim,1);
+    line(c,574,baseY,720,104,COL.dim,1);
+    circle(c,720,104,12,COL.ink,1,'rgba(226,234,243,0.8)');
+    label(c,'STAR',720,78,COL.ink,12);
+    angleArc(c,452,baseY,42,-0.55,-0.43,COL.accent,2);
+    label(c,'tiny arc',482,baseY-24,COL.accent,12);
+    label(c,'distance ≈ baseline / angle',430,76,COL.accent,18,'left');
+    label(c,'same geometry, larger ruler',430,112,COL.dim,13,'left');
+  }
+
+  function redraw(){
+    drawShadow(); drawArc(); drawMap(); drawLadder();
+  }
+
+  function initMap(){
+    if (mapStarted) return;
+    mapStarted = true;
+    const wrap = document.getElementById('mapWrap');
+    if (!window.maplibregl || !wrap) return;
+
+    const alexandria = [29.9187, 31.2001];
+    const syene = [32.8998, 24.0889];
+    const map = new maplibregl.Map({
+      container: 'earthGlobe',
+      style: {
+        version: 8,
+        sources: {
+          osm: {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '© OpenStreetMap contributors'
+          }
+        },
+        layers: [
+          { id: 'osm', type: 'raster', source: 'osm' }
+        ]
+      },
+      center: [31.35, 27.75],
+      zoom: 4.1,
+      bearing: -8,
+      pitch: 34,
+      attributionControl: true,
+      cooperativeGestures: true
+    });
+
+    map.scrollZoom.disable();
+    map.dragRotate.enable();
+    if (map.setProjection) {
+      map.setProjection({ type: 'globe' });
+    }
+
+    map.on('load', function(){
+      wrap.classList.add('is-live');
+      map.addSource('city-arc', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: { type: 'LineString', coordinates: [alexandria, syene] }
+            }
+          ]
+        }
+      });
+      map.addLayer({
+        id: 'city-arc-line',
+        type: 'line',
+        source: 'city-arc',
+        paint: {
+          'line-color': '#5ac4ff',
+          'line-width': 3,
+          'line-dasharray': [2, 1.5]
+        }
+      });
+      map.addSource('city-points', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            { type: 'Feature', properties: { name: 'Alexandria' }, geometry: { type: 'Point', coordinates: alexandria } },
+            { type: 'Feature', properties: { name: 'Syene / Aswan' }, geometry: { type: 'Point', coordinates: syene } }
+          ]
+        }
+      });
+      map.addLayer({
+        id: 'city-points-dot',
+        type: 'circle',
+        source: 'city-points',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#46d2be',
+          'circle-stroke-color': '#e7edf3',
+          'circle-stroke-width': 1.5
+        }
+      });
+
+      const alexLabel = document.createElement('div');
+      alexLabel.className = 'map-label';
+      alexLabel.textContent = 'Alexandria';
+      new maplibregl.Marker({ element: alexLabel, anchor: 'bottom-left', offset: [8, -8] })
+        .setLngLat(alexandria)
+        .addTo(map);
+
+      const syeneLabel = document.createElement('div');
+      syeneLabel.className = 'map-label';
+      syeneLabel.textContent = 'Syene / Aswan';
+      new maplibregl.Marker({ element: syeneLabel, anchor: 'top-left', offset: [8, 8] })
+        .setLngLat(syene)
+        .addTo(map);
+    });
+  }
+
+  document.getElementById('angleControls').addEventListener('click', function(e){
+    const btn=e.target.closest('button'); if(!btn) return;
+    state.angle=parseFloat(btn.dataset.angle);
+    this.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
+    redraw();
+  });
+  redraw();
+  initMap();
+})();
+</script>
+</body>
+</html>

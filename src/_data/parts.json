@@ -40,5 +40,11 @@
     "slug": "epicycles",
     "title": "Epicycles",
     "blurb": "Chain enough rotating circles, each spinning at its own steady rate, and their tip traces any shape at all — a square wave, a star, a signature. Fourier, drawn."
+  },
+  {
+    "num": "08",
+    "slug": "eratosthenes-earth",
+    "title": "Eratosthenes and the First Cosmic Ruler",
+    "blurb": "A noon shadow, two cities, and one circular arc turned Earth's curve into a measurement — the first step toward scaling the heavens."
   }
 ]
