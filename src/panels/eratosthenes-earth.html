@@ -51,6 +51,33 @@
   .controls button:hover{color:var(--ink); border-color:var(--ink-faint);}
   .controls button.active{color:var(--bg); background:var(--accent); border-color:var(--accent);}
   .readout{font-family:var(--mono); font-size:13px; color:var(--accent); margin-top:10px; line-height:1.55;}
+  .measure-compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:14px 0;
+  }
+  .measure-compare div{
+    border:1px solid var(--line-soft);
+    background:hsla(215, 26%, 7%, 0.54);
+    padding:10px 12px;
+  }
+  .measure-compare span{
+    display:block;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:4px;
+  }
+  .measure-compare b{
+    display:block;
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.35;
+  }
+  @media (max-width:520px){ .measure-compare{grid-template-columns:1fr;} }
   .note-list{display:grid; gap:10px; margin-top:8px;}
   .note-list p{border-left:1px solid var(--line); padding-left:12px;}
   .map-wrap{
@@ -63,48 +90,112 @@
       radial-gradient(circle at 56% 42%, hsla(199, 92%, 62%, 0.13), transparent 34%),
       linear-gradient(180deg, hsla(215, 30%, 13%, 0.95), hsla(215, 34%, 7%, 0.98));
     border:1px solid var(--line-soft);
+    isolation:isolate;
   }
   .map-wrap::after{
     content:'';
     position:absolute;
     inset:0;
-    z-index:3;
+    z-index:2;
     pointer-events:none;
     background:
-      linear-gradient(90deg, hsla(215, 30%, 7%, 0.34), transparent 24%, transparent 74%, hsla(215, 30%, 7%, 0.30)),
-      linear-gradient(180deg, hsla(215, 30%, 7%, 0.16), transparent 38%, hsla(215, 30%, 7%, 0.42)),
-      radial-gradient(circle at 52% 48%, transparent 0 38%, hsla(215, 35%, 5%, 0.32) 72%);
+      linear-gradient(90deg, hsla(215, 30%, 7%, 0.24), transparent 24%, transparent 74%, hsla(215, 30%, 7%, 0.20)),
+      linear-gradient(180deg, hsla(215, 30%, 7%, 0.10), transparent 42%, hsla(215, 30%, 7%, 0.28)),
+      radial-gradient(circle at 52% 48%, transparent 0 42%, hsla(215, 35%, 5%, 0.22) 74%);
     mix-blend-mode:multiply;
   }
   .map-wrap canvas{border:0;}
   #earthGlobe{
     position:absolute;
     inset:0;
-    z-index:2;
+    z-index:3;
   }
   #earthGlobe .maplibregl-canvas{
-    filter:saturate(0.24) sepia(0.18) hue-rotate(152deg) brightness(0.58) contrast(0.92);
+    filter:saturate(0.42) sepia(0.14) hue-rotate(146deg) brightness(0.82) contrast(0.98);
   }
   .map-fallback{
     position:absolute;
     inset:0;
-    z-index:1;
+    z-index:0;
   }
   .map-wrap.is-live .map-fallback{display:none;}
+  .maplibregl-marker{
+    z-index:40 !important;
+    pointer-events:none;
+  }
+  .map-city-callout{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    filter:drop-shadow(0 8px 14px hsla(215, 40%, 3%, 0.58));
+  }
   .map-label{
     font-family:var(--mono);
-    font-size:11px;
+    font-size:10.5px;
+    font-weight:700;
     letter-spacing:0.08em;
     text-transform:uppercase;
-    color:var(--ink);
-    background:hsla(215, 26%, 7%, 0.82);
+    color:hsl(210, 32%, 96%);
+    background:hsla(215, 26%, 6%, 0.96);
     border:1px solid hsla(199, 92%, 62%, 0.35);
-    border-radius:6px;
+    border-radius:4px;
     padding:5px 7px;
-    box-shadow:0 8px 20px hsla(215, 40%, 3%, 0.35);
+    box-shadow:0 8px 18px hsla(215, 40%, 3%, 0.62);
     white-space:nowrap;
-    position:relative;
-    z-index:4;
+    position:static;
+    transform:none;
+  }
+  .map-label.alexandria{
+    background:hsla(198, 88%, 34%, 0.96);
+    border-color:hsla(199, 92%, 72%, 0.95);
+    box-shadow:0 0 0 2px hsla(199, 92%, 62%, 0.16), 0 8px 18px hsla(215, 40%, 3%, 0.62);
+  }
+  .map-label.syene{
+    background:hsla(39, 82%, 34%, 0.96);
+    border-color:hsla(43, 92%, 72%, 0.98);
+    box-shadow:0 0 0 2px hsla(43, 84%, 66%, 0.18), 0 8px 18px hsla(215, 40%, 3%, 0.62);
+  }
+  .city-marker{
+    width:14px;
+    height:14px;
+    border-radius:999px;
+    border:1.5px solid hsla(43, 40%, 94%, 0.92);
+    box-shadow:0 0 0 4px hsla(199, 92%, 62%, 0.20), 0 8px 18px hsla(215, 40%, 3%, 0.64);
+    flex:0 0 auto;
+  }
+  .city-marker.alexandria{background:var(--accent);}
+  .city-marker.syene{
+    background:var(--warm);
+    box-shadow:0 0 0 4px hsla(43, 84%, 66%, 0.22), 0 8px 18px hsla(215, 40%, 3%, 0.64);
+  }
+  .map-distance{
+    font-family:var(--mono);
+    display:inline-flex;
+    flex-direction:column;
+    gap:1px;
+    width:max-content;
+    max-width:132px;
+    font-size:9.5px;
+    font-weight:700;
+    line-height:1.18;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:hsl(43, 92%, 78%);
+    background:hsla(33, 48%, 17%, 0.92);
+    border:1px solid hsla(43, 84%, 66%, 0.62);
+    border-radius:4px;
+    padding:5px 7px;
+    box-shadow:0 0 0 2px hsla(43, 84%, 66%, 0.08), 0 8px 18px hsla(215, 40%, 3%, 0.48);
+    white-space:nowrap;
+    position:static;
+    transform:none;
+  }
+  .map-distance small{
+    color:hsla(43, 92%, 86%, 0.74);
+    font-size:8.5px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    text-transform:none;
   }
   .maplibregl-ctrl-attrib{
     font-family:var(--mono);
@@ -161,6 +252,11 @@
       <p class="panel-text">So if the Alexandria-to-Syene distance is one arc on Earth's surface, then Earth's whole circumference is fifty of those arcs.</p>
       <div class="eq">circumference = distance × 360 / angle</div>
       <p class="panel-text">Using the traditional distance of <b>5,000 stadia</b>, the estimate becomes <b>250,000 stadia</b> around the Earth.</p>
+      <div class="measure-compare">
+        <div><span>Eratosthenes</span><b>≈ 39,375 km<br>≈ 24,467 mi</b></div>
+        <div><span>Modern meridian</span><b>≈ 40,008 km<br>≈ 24,860 mi</b></div>
+      </div>
+      <p class="panel-text">On that common stadion conversion, his result is about <b>633 km</b> short of the modern meridional circumference — roughly <b>1.6%</b> low.</p>
     </div>
   </section>
 
@@ -172,10 +268,11 @@
         <div id="earthGlobe" aria-label="MapLibre globe using OpenStreetMap tiles, centered on Egypt"></div>
         <canvas class="map-fallback" id="mapCanvas" width="900" height="420"></canvas>
       </div>
-      <div class="caption">OpenStreetMap tiles on a MapLibre globe: Alexandria and Syene/Aswan sit almost on the same meridian, so the north-south distance can stand in for the arc.</div>
+      <div class="caption">OpenStreetMap tiles on a MapLibre globe: Alexandria and ancient Syene, near modern Aswan, sit almost on the same meridian. A stadion was an ancient unit of length; using a common estimate of about 157.5 meters per stadion, 5,000 stadia is about 787 km, or 489 miles.</div>
     </div>
     <div>
       <p class="panel-text">The geometry works because the two cities are treated as lying nearly north-south. On a map, the distance looks like a straight segment. On the Earth, it is an <b>arc</b> of a huge circle.</p>
+      <p class="panel-text"><b>5,000 stadia</b> was the traditional distance between Alexandria and Syene. The exact stadion length is debated, but one common conversion puts that arc at roughly <b>787 km</b>, or <b>489 miles</b>. Multiply by fifty and Eratosthenes gets about <b>39,375 km</b> for Earth, very close to the modern north-south circumference of about <b>40,008 km</b>.</p>
       <p class="panel-text">That is the same idea as radians from the first chapter: an angle at the center cuts off an arc at the edge.</p>
       <div class="eq">arc length = radius × angle</div>
       <p class="panel-text">If you know the arc length and the angle, you can solve backward for the radius. Suddenly the radius of Earth is not mythic; it is a number.</p>
@@ -297,13 +394,18 @@
     const fraction=state.angle/360;
     const circumference=state.distance/fraction;
     const radius=circumference/(2*Math.PI);
+    const estimatedKm=circumference*0.1575;
+    const actualKm=40008;
+    const diffPct=(actualKm-estimatedKm)/actualKm*100;
     label(c,'angle / full turn',530,116,COL.dim,13,'left');
     label(c,state.angle.toFixed(1)+' / 360 = 1 / '+Math.round(360/state.angle),530,146,COL.ink,20,'left');
     label(c,'circumference',530,202,COL.dim,13,'left');
     label(c,state.distance.toLocaleString()+' × '+Math.round(360/state.angle)+' = '+Math.round(circumference).toLocaleString()+' stadia',530,232,COL.accent,18,'left');
-    label(c,'radius ≈ '+Math.round(radius).toLocaleString()+' stadia',530,274,COL.accentB,16,'left');
+    label(c,'≈ '+Math.round(estimatedKm).toLocaleString()+' km / '+Math.round(estimatedKm*0.621371).toLocaleString()+' mi',530,264,COL.accent,15,'left');
+    label(c,'modern meridian ≈ '+actualKm.toLocaleString()+' km',530,302,COL.warm,15,'left');
+    label(c,'about '+diffPct.toFixed(1)+'% low',530,330,COL.accentB,14,'left');
     document.getElementById('arcReadout').textContent =
-      'At '+state.angle.toFixed(1)+'°, the city arc is 1/'+Math.round(360/state.angle)+' of Earth.';
+      'At '+state.angle.toFixed(1)+'°, the city arc is 1/'+Math.round(360/state.angle)+' of Earth: Eratosthenes gives about '+Math.round(estimatedKm).toLocaleString()+' km versus the modern meridian at about '+actualKm.toLocaleString()+' km.';
   }
 
   function drawMap(){
@@ -389,30 +491,33 @@
             source: 'osm',
             paint: {
               'raster-opacity': 0.82,
-              'raster-saturation': -0.78,
-              'raster-contrast': 0.12,
+              'raster-saturation': -0.66,
+              'raster-contrast': 0.08,
               'raster-brightness-min': 0.05,
-              'raster-brightness-max': 0.48
+              'raster-brightness-max': 0.62
             }
           }
         ]
       },
-      center: [31.35, 27.75],
-      zoom: 4.1,
-      bearing: -8,
-      pitch: 34,
+      center: [31.28, 27.9],
+      zoom: 4.65,
+      bearing: 0,
+      pitch: 0,
       attributionControl: true,
       cooperativeGestures: true
     });
+    window.eratosthenesMap = map;
 
+    wrap.classList.add('is-live');
     map.scrollZoom.disable();
     map.dragRotate.enable();
-    if (map.setProjection) {
-      map.setProjection({ type: 'globe' });
-    }
 
     map.on('load', function(){
       wrap.classList.add('is-live');
+      map.fitBounds([alexandria, syene], {
+        padding: { top: 64, right: 178, bottom: 76, left: 128 },
+        duration: 0
+      });
       map.addSource('city-arc', {
         type: 'geojson',
         data: {
@@ -427,13 +532,23 @@
         }
       });
       map.addLayer({
+        id: 'city-arc-glow',
+        type: 'line',
+        source: 'city-arc',
+        paint: {
+          'line-color': '#d7bc72',
+          'line-width': 4,
+          'line-opacity': 0.18
+        }
+      });
+      map.addLayer({
         id: 'city-arc-line',
         type: 'line',
         source: 'city-arc',
         paint: {
-          'line-color': '#4fc7e6',
-          'line-width': 3,
-          'line-dasharray': [2, 1.5]
+          'line-color': '#d7bc72',
+          'line-width': 1.8,
+          'line-dasharray': [2, 2]
         }
       });
       map.addSource('city-points', {
@@ -442,7 +557,7 @@
           type: 'FeatureCollection',
           features: [
             { type: 'Feature', properties: { name: 'Alexandria' }, geometry: { type: 'Point', coordinates: alexandria } },
-            { type: 'Feature', properties: { name: 'Syene / Aswan' }, geometry: { type: 'Point', coordinates: syene } }
+            { type: 'Feature', properties: { name: 'Syene' }, geometry: { type: 'Point', coordinates: syene } }
           ]
         }
       });
@@ -451,27 +566,55 @@
         type: 'circle',
         source: 'city-points',
         paint: {
-          'circle-radius': 6,
-          'circle-color': '#d7bc72',
+          'circle-radius': 5,
+          'circle-color': [
+            'match',
+            ['get', 'name'],
+            'Alexandria', '#5ac4ff',
+            'Syene', '#f4be5b',
+            '#f4be5b'
+          ],
           'circle-stroke-color': '#f0eadb',
-          'circle-stroke-width': 1.5
+          'circle-stroke-width': 1.25
         }
       });
 
-      const alexLabel = document.createElement('div');
-      alexLabel.className = 'map-label';
-      alexLabel.textContent = 'Alexandria';
-      new maplibregl.Marker({ element: alexLabel, anchor: 'bottom-left', offset: [8, -8] })
-        .setLngLat(alexandria)
-        .addTo(map);
+      new maplibregl.Marker({
+        element: createCityCallout('alexandria', 'ALEXANDRIA'),
+        anchor: 'top-left',
+        offset: [12, 10]
+      }).setLngLat(alexandria).addTo(map);
 
-      const syeneLabel = document.createElement('div');
-      syeneLabel.className = 'map-label';
-      syeneLabel.textContent = 'Syene / Aswan';
-      new maplibregl.Marker({ element: syeneLabel, anchor: 'top-left', offset: [8, 8] })
-        .setLngLat(syene)
-        .addTo(map);
+      new maplibregl.Marker({
+        element: createCityCallout('syene', 'SYENE'),
+        anchor: 'top-left',
+        offset: [12, 10]
+      }).setLngLat(syene).addTo(map);
+
+      const distanceLabel = document.createElement('div');
+      distanceLabel.className = 'map-distance';
+      distanceLabel.innerHTML = '5,000 stadia<small>≈ 787 km / 489 mi</small>';
+      new maplibregl.Marker({
+        element: distanceLabel,
+        anchor: 'left',
+        offset: [10, 0]
+      }).setLngLat([
+        (alexandria[0] + syene[0]) / 2,
+        (alexandria[1] + syene[1]) / 2
+      ]).addTo(map);
     });
+  }
+
+  function createCityCallout(kind, text){
+    const callout = document.createElement('div');
+    callout.className = 'map-city-callout '+kind;
+    const marker = document.createElement('div');
+    marker.className = 'city-marker '+kind;
+    const labelEl = document.createElement('div');
+    labelEl.className = 'map-label '+kind;
+    labelEl.textContent = text;
+    callout.append(marker, labelEl);
+    return callout;
   }
 
   document.getElementById('angleControls').addEventListener('click', function(e){

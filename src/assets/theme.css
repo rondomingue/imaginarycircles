@@ -44,6 +44,9 @@
 .sub, .panel-text, .tl-desc, .card-blurb, .page > footer{
   font-family:var(--mono) !important;
 }
+.page > footer{
+  margin-bottom:64px !important;
+}
 /* Reading sizes for the body sans. */
 .sub{ font-size:16.5px !important; line-height:1.6 !important; }
 .panel-text{ font-size:13.5px !important; line-height:1.62 !important; }
